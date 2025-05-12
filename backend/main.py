@@ -15,8 +15,3 @@ def suma_vectores(vectores: vectores):
     resultado_x = vectores.Ax + vectores.Bx
     resultado_y = vectores.Ay + vectores.By
     return {"Rx": resultado_x, "Ry": resultado_y}
-
-
-
-
-
