@@ -5,16 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Vector App</title>
 
- 
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"
   /> 
 
+  <link rel="stylesheet" href="/static/style.css" />
   
-  <link rel="stylesheet" href="style.css" />
-  <script src="script.js"></script>
-
 </head>
 <body>
 
@@ -31,22 +28,55 @@
         <fieldset>
           <legend>Vector A</legend>
           <label for="ax">x:</label>
-          <input type="number" id="ax" name="ax" required />
+          <input
+            type="number"
+            id="ax"
+            name="ax"
+            required
+            step="any"
+            inputmode="decimal"
+            placeholder="e.g. 1.23"
+          /> <!-- El atributo step="any" permite cualquier decimal :contentReference[oaicite:0]{index=0} -->
           <label for="ay">y:</label>
-          <input type="number" id="ay" name="ay" required />
+          <input
+            type="number"
+            id="ay"
+            name="ay"
+            required
+            step="any"
+            inputmode="decimal"
+            placeholder="e.g. 4.56"
+          />
         </fieldset>
         <fieldset>
           <legend>Vector B</legend>
           <label for="bx">x:</label>
-          <input type="number" id="bx" name="bx" required />
+          <input
+            type="number"
+            id="bx"
+            name="bx"
+            required
+            step="any"
+            inputmode="decimal"
+            placeholder="e.g. 7.89"
+          /> <!-- Con inputmode="decimal" se sugiere al móvil teclado decimal :contentReference[oaicite:1]{index=1} -->
           <label for="by">y:</label>
-          <input type="number" id="by" name="by" required />
+          <input
+            type="number"
+            id="by"
+            name="by"
+            required
+            step="any"
+            inputmode="decimal"
+            placeholder="e.g. 0.12"
+          />
         </fieldset>
-        <button type="submit" id="submit-vectors" class="animate__animated animate__pulse animate__infinite">Calcular</button>
+        <button type="submit" id="submit-vectors" class="animate__animated animate__pulse animate__infinite">
+          Calcular
+        </button>
       </form>
     </section>
 
-    
     <section id="operation-selector" class="animate__animated animate__fadeInUp">
       <h2>Operaciones</h2>
       <div role="group">
@@ -57,29 +87,30 @@
       </div>
     </section>
 
-    
     <section id="results" class="animate__animated animate__fadeInUp">
       <h2>Resultados</h2>
       <div id="numeric-results"></div>
     </section>
 
-   
     <section id="vector-graph" class="animate__animated animate__fadeInUp">
       <h2>Gráfico</h2>
       <svg id="vector-svg" viewBox="-50 -50 300 300"></svg>
     </section>
 
-   
     <section id="history" class="animate__animated animate__fadeInUp">
-      <h2>Historial</h2>
-      <ul id="history-list"></ul>
-    </section>
+  <h2>Historial</h2>
+  <!-- Botón para limpiar el historial -->
+  <button id="clear-history" class="animate__animated animate__flash">
+    Limpiar historial
+  </button>
+  <ul id="history-list"></ul>
+</section>
   </main>
 
   <footer class="animate__animated animate__fadeInUp">
     <p>&copy; 2025 <strong>Vector App</strong>. Diseñado por.</p>
     <p><a href="#" class="footer-link">Términos</a> | <a href="#" class="footer-link">Privacidad</a></p>
   </footer>
-
+<script src="/static/script.js"></script>
 </body>
 </html>
