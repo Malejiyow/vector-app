@@ -1,22 +1,23 @@
-
 :root {
-  --bg-start:  #0f1021;
-  --bg-end:    #1f2233;    
-  --surface:   rgba(255,255,255,0.05);
-  --neon:      #4fd1c5;    
-  --neon2:     #81e6d9;    
-  --text:      #e2e8f0;
-  --muted:     #a0aec0;
-  --radius:    8px;
-  --space:     1rem;
-  --blur:      12px;        
+  --bg-start: #0f1021;
+  --bg-end: #1f2233;
+  --surface: rgba(255,255,255,0.05);
+  --neon: #4fd1c5;
+  --neon2: #81e6d9;
+  --text: #e2e8f0;
+  --muted: #a0aec0;
+  --radius: 8px;
+  --space: 1rem;
+  --blur: 12px;
   --transition: 0.3s ease;
   --shadow-neon: 0 0 8px var(--neon), 0 0 16px var(--neon), 0 0 24px var(--neon2);
 }
 
-
-* { margin:0; padding:0; box-sizing:border-box; }
-
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
   font-family: 'Segoe UI', sans-serif;
@@ -26,132 +27,304 @@ body {
   color: var(--text);
 }
 body::before {
-  content:'';
-  position:absolute; inset:0; z-index:-1;
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   backdrop-filter: blur(var(--blur));
-  background: inherit; 
+  background: inherit;
 }
 
-
-header {
-  text-align: center;
-  margin: var(--space) auto;
-  padding: var(--space);
-  background: var(--surface);
+/* Tutorial Modal */
+.tutorial-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+.tutorial-content {
+  background: rgba(31,34,51,0.9);
+  padding: 2rem;
+  border: 2px solid var(--neon2);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-neon), 0 4px 20px rgba(0,0,0,0.4);
-  transition: background var(--transition);
+  text-align: center;
+  max-width: 90%;
+  box-shadow: 0 0 16px var(--neon), 0 0 32px var(--neon2);
 }
-header h1.neon-text {
-  font-size: 2.5rem;
+.tutorial-content h2 {
+  margin-bottom: 1rem;
+  color: var(--neon);
+  text-shadow: var(--shadow-neon);
+}
+.tutorial-content p {
+  margin-bottom: 1.5rem;
+  color: var(--text);
+  font-size: 1rem;
+}
+.dismiss-tutorial {
+  background: var(--neon);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  cursor: pointer;
+  color: #000;
+  box-shadow: 0 0 12px var(--neon);
+  transition: background var(--transition), transform var(--transition);
+}
+.dismiss-tutorial:hover {
+  background: var(--neon2);
+  transform: translateY(-2px);
+}
+
+/* Wrapper y layout */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space);
+}
+
+/* Header neon mejorado */
+.app-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+  padding-bottom: 1rem;
+}
+.neon-text {
+  font-size: 3rem;
   color: #fff;
-  text-shadow: var(--shadow-neon); 
+  text-shadow: var(--shadow-neon);
 }
-header p {
-  color: var(--muted);
+.neon-subtitle {
+  font-size: 1.2rem;
+  color: var(--neon2);
+  text-shadow: 0 0 6px var(--neon2);
   margin-top: 0.5rem;
 }
+.neon-underline {
+  width: 220px;
+  height: 4px;
+  margin: 0.75rem auto 0;
+  background: var(--neon);
+  box-shadow: 0 0 12px var(--neon), 0 0 24px var(--neon2);
+  border-radius: 2px;
+}
 
-
+main {
+  width: 100%;
+}
 main > section {
   background: var(--surface);
-  backdrop-filter: blur(calc(var(--blur)/2));
+  backdrop-filter: blur(calc(var(--blur) / 2));
   margin: var(--space) auto;
   padding: var(--space);
   border-radius: var(--radius);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   transition: transform var(--transition), background var(--transition);
 }
 main > section:hover {
   transform: scale(1.02);
 }
 
-
-#vector-input form {
+/* Sección de ingreso de vectores */
+.input-section {
+  position: relative;
+  padding: 2rem;
+  border: 2px solid var(--neon2);
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 12px var(--neon), inset 0 0 8px var(--neon2);
+  border-radius: var(--radius);
+}
+.input-section h2 {
+  text-align: center;
+  color: var(--neon2);
+  text-shadow: var(--shadow-neon);
+  margin-bottom: 1.5rem;
+}
+.input-section form {
   display: grid;
   gap: var(--space);
-  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
-#vector-input fieldset {
-  border:none;
-  padding:var(--space);
-  background:rgba(255,255,255,0.1);
-  border-radius:var(--radius);
+.input-section fieldset {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px dashed var(--neon);
+  padding: var(--space);
+  border-radius: var(--radius);
 }
-legend { color: var(--neon); font-weight: bold; }
-input[type=number] {
-  width:100%; padding:0.5rem; border:1px solid var(--muted);
-  border-radius:var(--radius); background:none; color:#fff;
-  transition:border-color var(--transition), box-shadow var(--transition);
+.input-section legend {
+  background: var(--neon);
+  color: #000;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
 }
-input[type=number]:focus {
-  border-color:var(--neon2);
-  box-shadow: 0 0 8px var(--neon2);
-  outline:none;
+.input-section label {
+  color: var(--text);
+  font-weight: 500;
+}
+.input-section input {
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--neon2);
+  border-radius: var(--radius);
+  color: #fff;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.input-section input:focus {
+  border-color: var(--neon);
+  box-shadow: 0 0 8px var(--neon);
+  outline: none;
 }
 
-
-button {
-  padding:0.75rem 1.5rem;
-  font-size:1rem; font-weight:500;
-  border:none; border-radius:var(--radius);
-  cursor:pointer;
+/* Botón Calcular centrado y pequeño */
+.calculate-button {
+  display: block;
+  margin: var(--space) auto 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: var(--neon);
+  color: #000;
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: 0 0 12px var(--neon);
+  cursor: pointer;
   transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
 }
-button#submit-vectors {
-  background: var(--neon);
-  color:#000;
-  box-shadow: 0 0 12px var(--neon);
+.calculate-button:disabled {
+  background: var(--muted);
+  cursor: not-allowed;
+  box-shadow: none;
 }
-button#submit-vectors:hover {
+.calculate-button:not(:disabled):hover {
   background: var(--neon2);
   transform: translateY(-2px);
   box-shadow: 0 0 16px var(--neon2);
 }
-#operation-selector button {
-  background:transparent;
-  border:2px solid var(--neon);
-  color:var(--text);
-  box-shadow: 0 0 6px var(--neon);
+
+/* Sección Operaciones */
+.operations-section {
+  text-align: center;
 }
-#operation-selector button.active,
-#operation-selector button:hover {
+.operations-section h2 {
+  color: var(--neon2);
+  text-shadow: 0 0 6px var(--neon2);
+}
+.operations-group {
+  display: inline-flex;
+  gap: 0.5rem;
+  margin-top: var(--space);
+}
+.operations-group button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border: 2px solid var(--neon);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  box-shadow: 0 0 6px var(--neon);
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+.operations-group button.active,
+.operations-group button:hover {
   background: var(--neon);
   color: #000;
   border-color: var(--neon2);
   box-shadow: 0 0 12px var(--neon2);
+  transform: translateY(-2px);
 }
-
-#numeric-results { display:grid; gap:var(--space); grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); }
-.result-item {
-  background:rgba(255,255,255,0.1);
-  padding:var(--space);
-  border-radius:var(--radius);
-  text-align:center;
-}
-.result-item h3 { color:var(--neon); }
-#vector-svg {
-  width:100%; height:300px; border-radius:var(--radius);
-  background:rgba(255,255,255,0.05);
-  box-shadow:0 6px 18px rgba(0,0,0,0.2);
-}
-
-
-footer {
-  text-align:center;
-  padding:var(--space);
+.operation-warning {
   margin-top: var(--space);
-  background:var(--surface);
-  border-radius: var(--radius) var(--radius) 0 0;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
-  transition: background var(--transition);
+  color: var(--muted);
+  font-size: 0.9rem;
 }
-footer p { font-size:0.9rem; color:var(--muted); }
-footer .footer-link {
+
+/* Resultados y gráfico */
+.results-section,
+.graph-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#numeric-results {
+  display: grid;
+  gap: var(--space);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+.result-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--space);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.result-item h3 {
+  color: var(--neon);
+}
+#vector-svg {
+  width: 100%;
+  height: 300px;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* Historial */
+.history-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#history-list {
+  margin-top: var(--space);
+  width: 100%;
+  max-width: 400px;
+  list-style: none;
+  padding: 0;
+}
+#clear-history {
+  padding: 0.75rem 1.5rem;
+  margin-bottom: var(--space);
+  background: var(--neon);
+  color: #000;
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: 0 0 12px var(--neon);
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+#clear-history:hover {
+  background: var(--neon2);
+  transform: translateY(-2px);
+  box-shadow: 0 0 16px var(--neon2);
+}
+
+/* Footer */
+.app-footer {
+  width: 100%;
+  text-align: center;
+  padding: var(--space);
+  margin-top: var(--space);
+  background: var(--surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+}
+.footer-link {
   color: var(--neon2);
   text-decoration: none;
   transition: text-shadow var(--transition);
 }
-footer .footer-link:hover {
+.footer-link:hover {
   text-shadow: 0 0 8px var(--neon2);
 }

@@ -3,114 +3,102 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Vector App</title>
-
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"
-  /> 
-
-  <link rel="stylesheet" href="/static/style.css" />
+  <title>Vector App: Simulador Interactivo para Operaciones con Vectores en ℝ²</title>
   
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" />
+  <!-- Tu CSS -->
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
 
-  <header class="animate__animated animate__fadeInDown">
-    <h1 class="neon-text">Vector App</h1>
-    <p>Calculadora y visualizador de operaciones vectoriales en 2D</p>
-  </header>
+  <!-- Tutorial Modal -->
+  <div id="tutorial-modal" class="tutorial-modal animate__animated animate__fadeIn">
+    <div class="tutorial-content animate__animated animate__zoomIn">
+      <h2>👋 ¡Bienvenido!</h2>
+      <p>Ingresa dos vectores, elige una operación y pulsa <strong>Calcular</strong>.</p>
+      <button id="dismiss-tutorial" class="dismiss-tutorial">Entendido</button>
+    </div>
+  </div>
 
-  <main>
-    
-    <section id="vector-input" class="animate__animated animate__fadeInUp">
-      <h2>Ingreso de Vectores</h2>
-      <form id="vector-form">
-        <fieldset>
-          <legend>Vector A</legend>
-          <label for="ax">x:</label>
-          <input
-            type="number"
-            id="ax"
-            name="ax"
-            required
-            step="any"
-            inputmode="decimal"
-            placeholder="e.g. 1.23"
-          /> <!-- El atributo step="any" permite cualquier decimal :contentReference[oaicite:0]{index=0} -->
-          <label for="ay">y:</label>
-          <input
-            type="number"
-            id="ay"
-            name="ay"
-            required
-            step="any"
-            inputmode="decimal"
-            placeholder="e.g. 4.56"
-          />
-        </fieldset>
-        <fieldset>
-          <legend>Vector B</legend>
-          <label for="bx">x:</label>
-          <input
-            type="number"
-            id="bx"
-            name="bx"
-            required
-            step="any"
-            inputmode="decimal"
-            placeholder="e.g. 7.89"
-          /> <!-- Con inputmode="decimal" se sugiere al móvil teclado decimal :contentReference[oaicite:1]{index=1} -->
-          <label for="by">y:</label>
-          <input
-            type="number"
-            id="by"
-            name="by"
-            required
-            step="any"
-            inputmode="decimal"
-            placeholder="e.g. 0.12"
-          />
-        </fieldset>
-        <button type="submit" id="submit-vectors" class="animate__animated animate__pulse animate__infinite">
-          Calcular
-        </button>
-      </form>
-    </section>
+  <div class="app-wrapper">
 
-    <section id="operation-selector" class="animate__animated animate__fadeInUp">
-      <h2>Operaciones</h2>
-      <div role="group">
-        <button data-operation="sum">Suma</button>
-        <button data-operation="dot">Producto</button>
-        <button data-operation="magnitude">Magnitud</button>
-        <button data-operation="angle">Ángulo</button>
-      </div>
-    </section>
+    <!-- Header neon mejorado -->
+    <header class="app-header animate__animated animate__fadeInDown neon-header">
+      <h1 class="neon-text">Vector App</h1>
+      <p class="neon-subtitle">Simulador Interactivo para Operaciones con Vectores en ℝ²</p>
+      <div class="neon-underline"></div>
+    </header>
 
-    <section id="results" class="animate__animated animate__fadeInUp">
-      <h2>Resultados</h2>
-      <div id="numeric-results"></div>
-    </section>
+    <main class="app-main">
+      <!-- Ingreso de vectores -->
+      <section id="vector-input" class="input-section animate__animated animate__fadeInUp">
+        <h2>Ingreso de Vectores</h2>
+        <form id="vector-form">
+          <fieldset>
+            <legend>Vector A</legend>
+            <label for="ax">x:</label>
+            <input type="number" id="ax" name="ax" required step="any" placeholder="1.23" />
+            <label for="ay">y:</label>
+            <input type="number" id="ay" name="ay" required step="any" placeholder="4.56" />
+          </fieldset>
+          <fieldset>
+            <legend>Vector B</legend>
+            <label for="bx">x:</label>
+            <input type="number" id="bx" name="bx" required step="any" placeholder="7.89" />
+            <label for="by">y:</label>
+            <input type="number" id="by" name="by" required step="any" placeholder="0.12" />
+          </fieldset>
+        </form>
+        <button id="submit-vectors" class="calculate-button" disabled>Calcular</button>
+      </section>
 
-    <section id="vector-graph" class="animate__animated animate__fadeInUp">
-      <h2>Gráfico</h2>
-      <svg id="vector-svg" viewBox="-50 -50 300 300"></svg>
-    </section>
+      <!-- Selección de operación -->
+      <section id="operation-selector" class="operations-section animate__animated animate__fadeInUp">
+        <h2>Operaciones</h2>
+        <div role="group" class="operations-group">
+          <button data-operation="sum">Suma</button>
+          <button data-operation="dot">Producto</button>
+          <button data-operation="magnitude">Magnitud</button>
+          <button data-operation="angle">Ángulo</button>
+        </div>
+        <div id="operation-warning" class="operation-warning">
+          Selecciona una operación para habilitar «Calcular»
+        </div>
+      </section>
 
-    <section id="history" class="animate__animated animate__fadeInUp">
-  <h2>Historial</h2>
-  <!-- Botón para limpiar el historial -->
-  <button id="clear-history" class="animate__animated animate__flash">
-    Limpiar historial
-  </button>
-  <ul id="history-list"></ul>
-</section>
-  </main>
+      <!-- Resultados numéricos -->
+      <section id="results" class="results-section animate__animated animate__fadeInUp">
+        <h2>Resultados</h2>
+        <div id="numeric-results"></div>
+      </section>
 
-  <footer class="animate__animated animate__fadeInUp">
-    <p>&copy; 2025 <strong>Vector App</strong>. Diseñado por.</p>
-    <p><a href="#" class="footer-link">Términos</a> | <a href="#" class="footer-link">Privacidad</a></p>
-  </footer>
-<script src="/static/script.js"></script>
+      <!-- Gráfico SVG donde D3 dibujará -->
+      <section id="vector-graph" class="graph-section animate__animated animate__fadeInUp">
+        <h2>Gráfico</h2>
+        <svg id="vector-svg" width="400" height="400"></svg>
+      </section>
+
+      <!-- Historial -->
+      <section id="history" class="history-section animate__animated animate__fadeInUp">
+        <h2>Historial</h2>
+        <button id="clear-history" class="animate__animated animate__flash">Limpiar historial</button>
+        <ul id="history-list"></ul>
+      </section>
+    </main>
+
+    <footer class="app-footer animate__animated animate__fadeInUp">
+      <p>&copy; 2025 <strong>Vector App</strong>. Diseñado por.</p>
+      <p>
+        <a href="#" class="footer-link">Términos</a> |
+        <a href="#" class="footer-link">Privacidad</a>
+      </p>
+    </footer>
+  </div>
+
+  <!-- Incluye D3.js desde CDN -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- Tu lógica completa -->
+  <script src="/static/script.js"></script>
 </body>
 </html>
