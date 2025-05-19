@@ -225,6 +225,8 @@ main > section:hover {
   display: inline-flex;
   gap: 0.5rem;
   margin-top: var(--space);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 .operations-group button {
   padding: 0.5rem 1rem;
@@ -257,11 +259,13 @@ main > section:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 #numeric-results {
   display: grid;
   gap: var(--space);
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  width: 100%;
 }
 .result-item {
   background: rgba(255, 255, 255, 0.1);
@@ -272,12 +276,106 @@ main > section:hover {
 .result-item h3 {
   color: var(--neon);
 }
-#vector-svg {
+
+/* Gráfico interactivo */
+.graph-container {
+  position: relative;
   width: 100%;
-  height: 300px;
+  height: 600px;
+  border: 2px solid var(--neon2);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 12px var(--neon), 0 0 24px var(--neon2);
+}
+
+.vector-canvas {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.vector-canvas:active {
+  cursor: grabbing;
+}
+
+/* Estilos mejorados para la cuadrícula */
+.grid-line {
+  stroke: var(--neon2);
+  stroke-width: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.grid-line-main {
+  stroke: var(--neon);
+  stroke-width: 1.5;
+  opacity: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Estilos mejorados para los ejes */
+.axis path {
+  stroke: none;
+}
+
+.axis line {
+  stroke: var(--neon2);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.axis text {
+  fill: var(--neon);
+  font-size: 12px;
+  font-family: 'Consolas', monospace;
+  text-shadow: 0 0 4px var(--neon2);
+}
+
+.axis-label {
+  fill: var(--neon);
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 0 0 6px var(--neon2);
+}
+
+/* Estilos para vectores */
+.vector {
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.vector-label {
+  font-family: 'Consolas', monospace;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.label-background {
+  fill: rgba(0, 0, 0, 0.7);
+  stroke: var(--neon2);
+  stroke-width: 0.5;
+  stroke-opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Coordenadas mejoradas */
+.coordinates-display {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--neon);
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--neon2);
+  font-family: 'Consolas', monospace;
+  font-size: 14px;
+  box-shadow: 0 0 8px var(--neon);
+  z-index: 10;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
 }
 
 /* Historial */
@@ -292,6 +390,13 @@ main > section:hover {
   max-width: 400px;
   list-style: none;
   padding: 0;
+}
+#history-list li {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--radius);
+  border-left: 3px solid var(--neon);
 }
 #clear-history {
   padding: 0.75rem 1.5rem;
@@ -327,4 +432,18 @@ main > section:hover {
 }
 .footer-link:hover {
   text-shadow: 0 0 8px var(--neon2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .neon-text {
+    font-size: 2rem;
+  }
+  .operations-group {
+    flex-direction: column;
+    align-items: center;
+  }
+  .graph-container {
+    height: 400px;
+  }
 }

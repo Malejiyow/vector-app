@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"/>
   <title>Vector App: Simulador Interactivo para Operaciones con Vectores en ℝ²</title>
   
   <!-- Animate.css -->
@@ -16,7 +16,7 @@
   <div id="tutorial-modal" class="tutorial-modal animate__animated animate__fadeIn">
     <div class="tutorial-content animate__animated animate__zoomIn">
       <h2>👋 ¡Bienvenido!</h2>
-      <p>Ingresa dos vectores, elige una operación y pulsa <strong>Calcular</strong>.</p>
+      <p>Arrastra el plano con el mouse y usa la rueda para hacer zoom</p>
       <button id="dismiss-tutorial" class="dismiss-tutorial">Entendido</button>
     </div>
   </div>
@@ -61,6 +61,7 @@
           <button data-operation="dot">Producto</button>
           <button data-operation="magnitude">Magnitud</button>
           <button data-operation="angle">Ángulo</button>
+          <button data-operation="zoom-reset">Reset Zoom</button>
         </div>
         <div id="operation-warning" class="operation-warning">
           Selecciona una operación para habilitar «Calcular»
@@ -71,12 +72,23 @@
       <section id="results" class="results-section animate__animated animate__fadeInUp">
         <h2>Resultados</h2>
         <div id="numeric-results"></div>
+        <div id="coordinates-display" class="coordinates-display"></div>
       </section>
 
-      <!-- Gráfico SVG donde D3 dibujará -->
+      <!-- Gráfico SVG interactivo -->
       <section id="vector-graph" class="graph-section animate__animated animate__fadeInUp">
-        <h2>Gráfico</h2>
-        <svg id="vector-svg" width="400" height="400"></svg>
+        <h2>Visualización Interactiva</h2>
+        <div class="graph-container">
+          <svg id="vector-svg" class="vector-canvas" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+            <!-- Marcadores para flechas -->
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                      refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" />
+              </marker>
+            </defs>
+          </svg>
+        </div>
       </section>
 
       <!-- Historial -->
@@ -98,7 +110,7 @@
 
   <!-- Incluye D3.js desde CDN -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <!-- Tu lógica completa -->
+  <!-- Tu lógica actualizada -->
   <script src="/static/script.js"></script>
 </body>
 </html>
