@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"/>
   <title>Vector App: Simulador Interactivo para Operaciones con Vectores en ℝ²</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/static/resources/ICON_VECTOR-APP.png">
+  <link rel="apple-touch-icon" href="/static/resources/ICON_VECTOR-APP.png">
   
   <!-- Animate.css -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" />
@@ -12,56 +16,118 @@
 </head>
 <body>
 
+  <!-- Theme Switcher -->
+  <button class="theme-switch" id="theme-switch" aria-label="Cambiar tema">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
+    </svg>
+  </button>
+
   <!-- Tutorial Modal -->
   <div id="tutorial-modal" class="tutorial-modal animate__animated animate__fadeIn">
     <div class="tutorial-content animate__animated animate__zoomIn">
-      <h2>👋 ¡Bienvenido!</h2>
-      <p>Arrastra el plano con el mouse y usa la rueda para hacer zoom</p>
-      <button id="dismiss-tutorial" class="dismiss-tutorial">Entendido</button>
+      <button id="close-tutorial" class="close-tutorial" title="Cerrar tutorial">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+      <h2>👋 ¡Bienvenido a Vector App!</h2>
+      <div class="tutorial-steps">
+        <div class="tutorial-step active" data-step="1">
+          <h3>1. Ingresa tus vectores</h3>
+          <p>Usa el botón "Agregar Vector" para crear vectores. Cada vector representa una fuerza o desplazamiento en el plano.</p>
+          <div class="tutorial-image">
+            <svg viewBox="0 0 24 24" width="48" height="48">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="tutorial-step" data-step="2">
+          <h3>2. Selecciona una operación</h3>
+          <p>Elige entre: Suma Vectorial, Producto Escalar, Magnitud o Ángulo entre vectores.</p>
+          <div class="tutorial-image">
+            <svg viewBox="0 0 24 24" width="48" height="48">
+              <path d="M12 2v20M2 12h20M12 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="tutorial-step" data-step="3">
+          <h3>3. Analiza los resultados</h3>
+          <p>Visualiza los vectores, sus magnitudes, ángulos y resultados en el plano cartesiano. Usa la rueda del mouse para zoom y arrastra para mover.</p>
+          <div class="tutorial-image">
+            <svg viewBox="0 0 24 24" width="48" height="48">
+              <path d="M12 2v20M2 12h20M12 2l10 10M12 2L2 12M12 22l10-10M12 22L2 12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="tutorial-navigation">
+        <button id="prev-step" class="tutorial-nav-button" disabled>Anterior</button>
+        <button id="next-step" class="tutorial-nav-button">Siguiente</button>
+        <button id="dismiss-tutorial" class="dismiss-tutorial" style="display: none;">¡Comenzar!</button>
+      </div>
     </div>
   </div>
-
+ <!-- Header neon mejorado -->
+    <header class="app-header animate__animated animate__fadeInDown neon-header">
+      <button id="reopen-tutorial" class="tutorial-button" title="Ver tutorial">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="logo-container">
+        <img src="/static/resources/ICON_VECTOR-APP_PNG.PNG" alt="Vector App Logo" class="app-logo animate__animated animate__pulse animate__infinite">
+        <div class="title-container">
+          <h1 class="neon-text">Vector App</h1>
+          <p class="neon-subtitle">Simulador Interactivo para Operaciones con Vectores en ℝ²</p>
+          <div class="version-badge">Versión 1.0</div>
+          <div class="neon-underline"></div>
+        </div>
+      </div>
+    </header>
   <div class="app-wrapper">
 
-    <!-- Header neon mejorado -->
-    <header class="app-header animate__animated animate__fadeInDown neon-header">
-      <h1 class="neon-text">Vector App</h1>
-      <p class="neon-subtitle">Simulador Interactivo para Operaciones con Vectores en ℝ²</p>
-      <div class="neon-underline"></div>
-    </header>
+    <div id="global-loader" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:rgba(0,0,0,0.25);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+      <div style="background:var(--surface);padding:2rem 2.5rem;border-radius:18px;box-shadow:0 0 24px var(--neon2);display:flex;flex-direction:column;align-items:center;gap:1rem;">
+        <div class="animate__animated animate__pulse animate__infinite" style="font-size:2.5rem;color:var(--neon);">
+          <svg width="48" height="48" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-dasharray="31.4 31.4" stroke-dashoffset="0"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"/></circle></svg>
+        </div>
+        <div style="color:var(--neon2);font-size:1.2rem;font-weight:600;">Cargando...</div>
+      </div>
+    </div>
 
     <main class="app-main">
       <!-- Ingreso de vectores -->
       <section id="vector-input" class="input-section animate__animated animate__fadeInUp">
         <h2>Ingreso de Vectores</h2>
-        <form id="vector-form">
-          <fieldset>
-            <legend>Vector A</legend>
-            <label for="ax">x:</label>
-            <input type="number" id="ax" name="ax" required step="any" placeholder="1.23" />
-            <label for="ay">y:</label>
-            <input type="number" id="ay" name="ay" required step="any" placeholder="4.56" />
-          </fieldset>
-          <fieldset>
-            <legend>Vector B</legend>
-            <label for="bx">x:</label>
-            <input type="number" id="bx" name="bx" required step="any" placeholder="7.89" />
-            <label for="by">y:</label>
-            <input type="number" id="by" name="by" required step="any" placeholder="0.12" />
-          </fieldset>
-        </form>
-        <button id="submit-vectors" class="calculate-button" disabled>Calcular</button>
+        <div class="vectors-container" id="vectors-container">
+          <!-- Los vectores se agregarán dinámicamente aquí -->
+        </div>
+        <div class="vector-controls">
+          <button id="add-vector-button" class="add-vector-button">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Agregar Vector
+          </button>
+          <button id="clear-vectors-button" class="clear-vectors-button">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Limpiar Vectores
+          </button>
+        </div>
+        <button id="calculate-button" class="calculate-button" disabled>Calcular</button>
       </section>
 
       <!-- Selección de operación -->
       <section id="operation-selector" class="operations-section animate__animated animate__fadeInUp">
-        <h2>Operaciones</h2>
+        <h2>Operaciones Vectoriales</h2>
         <div role="group" class="operations-group">
-          <button data-operation="sum">Suma</button>
-          <button data-operation="dot">Producto</button>
-          <button data-operation="magnitude">Magnitud</button>
-          <button data-operation="angle">Ángulo</button>
-          <button data-operation="zoom-reset">Reset Zoom</button>
+          <button class="operation-button" data-operation="sum">Suma Vectorial</button>
+          <button class="operation-button" data-operation="dot">Producto Escalar</button>
+          <button class="operation-button" data-operation="magnitude">Magnitud</button>
+          <button class="operation-button" data-operation="angle">Ángulo</button>
         </div>
         <div id="operation-warning" class="operation-warning">
           Selecciona una operación para habilitar «Calcular»
@@ -71,45 +137,73 @@
       <!-- Resultados numéricos -->
       <section id="results" class="results-section animate__animated animate__fadeInUp">
         <h2>Resultados</h2>
-        <div id="numeric-results"></div>
-        <div id="coordinates-display" class="coordinates-display"></div>
+        <div class="results-container">
+          <div class="results-details">
+            <div class="result-card vector-result">
+              <div class="result-title">Vector Resultante</div>
+              <div class="result-content" id="vector-result-content"></div>
+            </div>
+            <div class="result-card magnitude-result">
+              <div class="result-title">Magnitud</div>
+              <div class="result-content" id="magnitude-result-content"></div>
+            </div>
+            <div class="result-card angle-result">
+              <div class="result-title">Ángulo</div>
+              <div class="result-content" id="angle-result-content"></div>
+            </div>
+            <div class="result-card dot-result">
+              <div class="result-title">Producto Escalar</div>
+              <div class="result-content" id="dot-result-content"></div>
+            </div>
+          </div>
+        </div>
+        <div id="coordinates-display" class="coordinates-display">
+          <span id="coords-value">X: 0.00, Y: 0.00</span>
+        </div>
       </section>
 
-      <!-- Gráfico SVG interactivo -->
+      <!-- Gráfico Desmos interactivo -->
       <section id="vector-graph" class="graph-section animate__animated animate__fadeInUp">
         <h2>Visualización Interactiva</h2>
         <div class="graph-container">
-          <svg id="vector-svg" class="vector-canvas" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
-            <!-- Marcadores para flechas -->
-            <defs>
-              <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-                      refX="9" refY="3.5" orient="auto">
-                <polygon points="0 0, 10 3.5, 0 7" />
-              </marker>
-            </defs>
-          </svg>
+          <div id="desmos-calculator"></div>
         </div>
       </section>
 
       <!-- Historial -->
       <section id="history" class="history-section animate__animated animate__fadeInUp">
-        <h2>Historial</h2>
-        <button id="clear-history" class="animate__animated animate__flash">Limpiar historial</button>
-        <ul id="history-list"></ul>
+        <div class="history-header">
+          <h2>Historial de Operaciones</h2>
+          <button id="clear-history" class="clear-history-button">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Limpiar
+          </button>
+        </div>
+        <div class="history-container">
+          <ul id="history-list" class="history-list"></ul>
+        </div>
       </section>
     </main>
 
     <footer class="app-footer animate__animated animate__fadeInUp">
-      <p>&copy; 2025 <strong>Vector App</strong>. Diseñado por.</p>
-      <p>
-        <a href="#" class="footer-link">Términos</a> |
-        <a href="#" class="footer-link">Privacidad</a>
-      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.7rem; flex-wrap: wrap;">
+        <span class="footer-paloma" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;">
+          <img src="/static/resources/ICON_VECTOR-APP_PNG.png" alt="Paloma" style="width:100%;height:100%;object-fit:contain;">
+        </span>
+        <span>&copy; 2025 <strong>Vector App</strong>.</span>
+        <a href="/static/terminos.html" class="footer-link">Términos</a>
+        <span style="color:var(--muted);">|</span>
+        <a href="/static/privacidad.html" class="footer-link">Privacidad</a>
+      </div>
     </footer>
   </div>
 
   <!-- Incluye D3.js desde CDN -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- Desmos API -->
+  <script src="https://www.desmos.com/api/v1.7/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
   <!-- Tu lógica actualizada -->
   <script src="/static/script.js"></script>
 </body>

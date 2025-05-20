@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"/>
+  <title>Privacidad - Vector App</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/static/resources/ICON_VECTOR-APP.png">
+  <link rel="apple-touch-icon" href="/static/resources/ICON_VECTOR-APP.png">
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    html, body { height: 100%; min-height: 100vh; margin: 0; padding: 0; }
+    body.legal-bg { min-height: 100vh; height: 100vh; display: flex; flex-direction: column; }
+    .legal-header, .chat-container, .app-footer { flex-shrink: 0; }
+    .chat-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+    .logo-home {
+      position: fixed;
+      top: 1.2rem;
+      left: 1.2rem;
+      z-index: 100;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      box-shadow: 0 0 24px var(--neon2), 0 0 8px var(--neon);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .logo-home:hover {
+      transform: scale(1.08) rotate(-8deg);
+      box-shadow: 0 0 36px var(--neon2), 0 0 16px var(--neon);
+    }
+    @media (max-width: 600px) {
+      .logo-home {
+        width: 44px;
+        height: 44px;
+        top: 0.5rem;
+        left: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body class="legal-bg">
+  <a href="/" class="logo-home" title="Volver a inicio">
+    <img src="/static/resources/ICON_VECTOR-APP_PNG.png" alt="Paloma" style="width:90%;height:90%;object-fit:contain;">
+  </a>
+  <div class="legal-header">
+    <h1>Política de Privacidad</h1>
+    <p>Paloma <img src="/static/resources/ICON_VECTOR-APP_PNG.png" alt="Paloma" style="height:1.5em;vertical-align:middle;"> te explica cómo cuidamos tu información en Vector App.</p>
+  </div>
+  <div class="legal-divider"></div>
+  <div class="chat-container">
+    <div class="chat-bubble">
+      <div class="avatar-paloma"><img src="/static/resources/ICON_VECTOR-APP_PNG.png" alt="Paloma" style="width:100%;height:100%;object-fit:contain;"></div>
+      <div class="bubble-paloma">
+        ¡Hola! Soy Paloma, tu guía de confianza.<br>
+        Te explicaré cómo Vector App cuida tu privacidad.
+      </div>
+    </div>
+    <div class="chat-bubble">
+      <div class="avatar-paloma"><img src="/static/resources/ICON_VECTOR-APP_PNG.png" alt="Paloma" style="width:100%;height:100%;object-fit:contain;"></div>
+      <div class="bubble-paloma">
+        <strong>1. Sin registro:</strong> No necesitas crear una cuenta ni dar datos personales para usar Vector App.
+      </div>
+    </div>
+    <div class="chat-bubble">
+      <div class="avatar-paloma"><img src="/static/resources/ICON_VECTOR-APP_PNG.png" alt="Paloma" style="width:100%;height:100%;object-fit:contain;"></div>
+      <div class="bubble-paloma">
+        <strong>2. Historial local:</strong> Tu historial de operaciones se guarda solo en tu dispositivo, usando almacenamiento local. Nadie más puede verlo.
+      </div>
+    </div>
+    <div class="chat-bubble">
+      <div class="avatar-paloma"><img src="/static/resources/ICON_VECTOR-APP_PNG.png" alt="Paloma" style="width:100%;height:100%;object-fit:contain;"></div>
+      <div class="bubble-paloma">
+        <strong>3. Sin rastreo:</strong> No usamos cookies de rastreo ni compartimos tu información con terceros.
+      </div>
+    </div>
+    <div class="chat-bubble">
+      <div class="avatar-paloma"><img src="/static/resources/ICON_VECTOR-APP_PNG.png" alt="Paloma" style="width:100%;height:100%;object-fit:contain;"></div>
+      <div class="bubble-paloma">
+        <strong>4. Seguridad:</strong> Si tienes dudas sobre tu privacidad, ¡pregúntame! Estoy aquí para ayudarte.
+      </div>
+    </div>
+    <div class="chat-bubble">
+      <div class="bubble-user">¡Gracias, Paloma! Me siento seguro usando Vector App.</div>
+    </div>
+  </div>
+  <footer class="app-footer animate__animated animate__fadeInUp">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 0.7rem; flex-wrap: wrap;">
+      <span class="footer-paloma" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;">
+        <img src="/static/resources/ICON_VECTOR-APP_PNG.png" alt="Paloma" style="width:100%;height:100%;object-fit:contain;">
+      </span>
+      <span>&copy; 2025 <strong>Vector App</strong>.</span>
+      <a href="/static/terminos.html" class="footer-link">Términos</a>
+      <span style="color:var(--muted);">|</span>
+      <a href="/static/privacidad.html" class="footer-link">Privacidad</a>
+    </div>
+  </footer>
+</body>
+</html> 

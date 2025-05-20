@@ -8,591 +8,720 @@ function fmt(n, sig = 3) {
   return parseFloat(n.toPrecision(sig));
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  // ---------------------------
-  // Configuración D3 y elementos
-  // ---------------------------
-  const svg = d3.select("#vector-svg");
-  const width = 800;
-  const height = 600;
-  let currentTransform = d3.zoomIdentity;
-  
-  // Grupos SVG con GPU acceleration
-  const zoomGroup = svg.append("g")
-    .style("transform-origin", "center")
-    .style("will-change", "transform");
-  const gridGroup = zoomGroup.append("g")
-    .attr("class", "grid-group")
-    .style("will-change", "transform");
-  const axesGroup = zoomGroup.append("g")
-    .attr("class", "axes-group")
-    .style("will-change", "transform");
-  const vectorsGroup = zoomGroup.append("g")
-    .attr("class", "vectors-group")
-    .style("will-change", "transform");
-  const labelsGroup = zoomGroup.append("g")
-    .attr("class", "labels-group")
-    .style("will-change", "transform");
-  const markersGroup = svg.append("defs");
+// Variables globales
+let calculator;
+let vectorCount = 0;
+const maxVectors = 10;
+let currentExpressions = [];
+let history = JSON.parse(localStorage.getItem('vectorHistory') || '[]');
 
-  // Configuración inicial del SVG
-  svg.attr("viewBox", `0 0 ${width} ${height}`)
-     .attr("preserveAspectRatio", "xMidYMid meet")
-     .style("background", "rgba(0, 0, 0, 0.2)");
+// Variables globales para el tutorial
+let currentStep = 1;
+const totalSteps = 3;
 
-  // Marcador de flecha mejorado
-  markersGroup.append("marker")
-    .attr("id", "arrowhead")
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 9)
-    .attr("refY", 0)
-    .attr("markerWidth", 8)
-    .attr("markerHeight", 8)
-    .attr("orient", "auto-start-reverse")
-    .append("path")
-      .attr("d", "M0,-5L10,0L0,5L2,0Z")
-      .attr("fill", "#4fd1c5");
+// Inicialización
+document.addEventListener('DOMContentLoaded', () => {
+    initializeCalculator();
+    setupEventListeners();
+    setupTutorial();
+    // Agregar dos vectores por defecto
+    addVector();
+    addVector();
+    renderHistory();
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon();
+    updateCalculatorTheme();
+});
 
-  // ---------------------------
-  // Sistema de Zoom y Pan Mejorado
-  // ---------------------------
-  const zoom = d3.zoom()
-    .scaleExtent([0.2, 50]) // Limitamos el zoom a un rango más práctico
-    .on("zoom", (event) => {
-      currentTransform = event.transform;
-      
-      // Aplicar transformación con GPU acceleration
-      zoomGroup.style("transform", `translate(${event.transform.x}px, ${event.transform.y}px) scale(${event.transform.k})`);
-      
-      // Actualizar elementos con throttling
-      if (!zoom.updateTimer) {
-        zoom.updateTimer = setTimeout(() => {
-          requestAnimationFrame(() => {
-            updateGrid(event.transform);
-            updateAxes(event.transform);
-            updateVectorLabels();
-            zoom.updateTimer = null;
-          });
-        }, 16);
-      }
+function initializeCalculator() {
+    calculator = Desmos.GraphingCalculator(document.getElementById('desmos-calculator'), {
+        keypad: false,
+        menuBar: false,
+        border: false,
+        settingsMenu: false,
+        zoomButtons: true,
+        expressions: false,
+        lockViewport: false,
+        backgroundColor: 'transparent',
+        colors: {
+            foreground: '#ffffff',
+            background: 'transparent'
+        }
     });
 
-  svg.call(zoom)
-     .call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(1));
-
-  // ---------------------------
-  // Funciones del Plano Cartesiano Mejoradas
-  // ---------------------------
-  function updateGrid(transform) {
-    const scale = transform.k;
-    const gridSize = calculateGridSize(scale);
-    const extent = Math.min(1000, Math.ceil(800 / scale)); // Limitamos el tamaño máximo de la cuadrícula
-    
-    // Crear array de líneas con step adaptativo
-    const lines = d3.range(-extent, extent + gridSize, gridSize).filter(d => 
-      Math.abs(d) <= extent // Filtrar líneas fuera del rango
-    );
-    
-    // Líneas verticales
-    const verticalLines = gridGroup.selectAll(".grid-line-vertical")
-      .data(lines);
-
-    verticalLines.enter()
-      .append("line")
-      .merge(verticalLines)
-      .attr("class", d => `grid-line grid-line-vertical ${d === 0 ? 'grid-line-main' : ''}`)
-      .attr("x1", d => d)
-      .attr("x2", d => d)
-      .attr("y1", -extent)
-      .attr("y2", extent)
-      .attr("opacity", d => {
-        if (d === 0) return 0.8;
-        if (d % (gridSize * 5) === 0) return 0.4;
-        return 0.2;
-      });
-
-    verticalLines.exit().remove();
-
-    // Líneas horizontales
-    const horizontalLines = gridGroup.selectAll(".grid-line-horizontal")
-      .data(lines);
-
-    horizontalLines.enter()
-      .append("line")
-      .merge(horizontalLines)
-      .attr("class", d => `grid-line grid-line-horizontal ${d === 0 ? 'grid-line-main' : ''}`)
-      .attr("y1", d => d)
-      .attr("y2", d => d)
-      .attr("x1", -extent)
-      .attr("x2", extent)
-      .attr("opacity", d => {
-        if (d === 0) return 0.8;
-        if (d % (gridSize * 5) === 0) return 0.4;
-        return 0.2;
-      });
-
-    horizontalLines.exit().remove();
-  }
-
-  function calculateGridSize(scale) {
-    // Ajustar la densidad de la cuadrícula según el zoom
-    if (scale < 0.5) return 50;
-    if (scale < 2) return 20;
-    if (scale < 5) return 10;
-    if (scale < 10) return 5;
-    return 2;
-  }
-
-  function updateAxes(transform) {
-    const scale = transform.k;
-    const range = Math.min(1000, Math.ceil(500 / scale)); // Limitamos el rango de los ejes
-    
-    // Función para formatear números en notación científica
-    const formatNumber = d => {
-      if (Math.abs(d) === 0) return "0";
-      if (Math.abs(d) < 0.01 || Math.abs(d) > 9999) {
-        return d.toExponential(1);
-      }
-      return d.toFixed(Math.max(0, Math.min(2, Math.floor(Math.log10(scale)))));
-    };
-
-    // Configurar ejes con menos ticks en zoom lejano
-    const tickCount = Math.min(10, Math.max(5, Math.floor(width/(100/scale))));
-    
-    const xAxis = d3.axisBottom(d3.scaleLinear()
-      .domain([-range, range])
-      .range([-range, range]))
-      .ticks(tickCount)
-      .tickFormat(formatNumber)
-      .tickSize(6);
-
-    const yAxis = d3.axisLeft(d3.scaleLinear()
-      .domain([-range, range])
-      .range([-range, range]))
-      .ticks(tickCount)
-      .tickFormat(formatNumber)
-      .tickSize(6);
-
-    // Limpiar y redibujar ejes
-    axesGroup.selectAll("*").remove();
-    
-    const xAxisGroup = axesGroup.append("g")
-      .attr("class", "axis axis-x")
-      .call(xAxis);
-
-    const yAxisGroup = axesGroup.append("g")
-      .attr("class", "axis axis-y")
-      .call(yAxis);
-
-    // Ajustar estilos
-    axesGroup.selectAll(".axis line")
-      .attr("stroke", "#4fd1c5")
-      .attr("stroke-width", 1)
-      .attr("vector-effect", "non-scaling-stroke");
-
-    axesGroup.selectAll(".axis text")
-      .attr("fill", "#4fd1c5")
-      .attr("font-size", `${Math.min(12, 12/scale)}px`)
-      .attr("text-shadow", "0 0 4px rgba(79, 209, 197, 0.5)");
-  }
-
-  // ---------------------------
-  // Interfaz de Usuario
-  // ---------------------------
-  // Elementos DOM
-  const tutorialModal = document.getElementById('tutorial-modal');
-  const dismissBtn = document.getElementById('dismiss-tutorial');
-  const form = document.getElementById("vector-form");
-  const opButtons = document.querySelectorAll('.operations-group button');
-  const calcBtn = document.getElementById('submit-vectors');
-  const warning = document.getElementById('operation-warning');
-  const resultsDiv = document.getElementById("numeric-results");
-  const historyList = document.getElementById("history-list");
-  const clearBtn = document.getElementById("clear-history");
-  const coordsDisplay = document.getElementById("coordinates-display");
-
-  // Estado de la aplicación
-  let currentOperation = null;
-  let history = [];
-
-  // Inicialización
-  initApp();
-
-  function initApp() {
-    // Cargar historial
-    if (localStorage.getItem("vectorHistory")) {
-      history = JSON.parse(localStorage.getItem("vectorHistory"));
-      renderHistory();
-    }
-
-    // Event listeners
-    dismissBtn.addEventListener('click', dismissTutorial);
-    clearBtn.addEventListener("click", clearHistory);
-    calcBtn.addEventListener('click', handleCalculate);
-    
-    opButtons.forEach(btn => {
-      btn.addEventListener('click', () => selectOperation(btn));
+    // Configurar vista inicial
+    calculator.setMathBounds({
+        left: -10,
+        right: 10,
+        bottom: -10,
+        top: 10
     });
 
     // Mostrar coordenadas en tiempo real
-    svg.on("mousemove", updateCoordinateDisplay);
-  }
-
-  // ---------------------------
-  // Manejo de Operaciones
-  // ---------------------------
-  function selectOperation(btn) {
-    opButtons.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentOperation = btn.dataset.operation;
-    calcBtn.disabled = false;
-    warning.style.display = 'none';
-    
-    // Manejar reset de zoom
-    if (currentOperation === "zoom-reset") {
-      resetZoom();
-      btn.classList.remove('active');
-      calcBtn.disabled = true;
-      warning.style.display = 'block';
-    }
-  }
-
-  function handleCalculate(e) {
-    e.preventDefault();
-    if (!currentOperation || currentOperation === "zoom-reset") return;
-    
-    const vectorData = getVectorData();
-    if (vectorData) executeOperation(vectorData);
-  }
-
-  function getVectorData() {
-    const ax = parseFloat(document.getElementById("ax").value);
-    const ay = parseFloat(document.getElementById("ay").value);
-    const bx = parseFloat(document.getElementById("bx").value);
-    const by = parseFloat(document.getElementById("by").value);
-
-    if (isNaN(ax) || isNaN(ay) || isNaN(bx) || isNaN(by)) {
-      resultsDiv.innerHTML = '<p class="error">❌ Ingresa valores numéricos válidos</p>';
-      return null;
-    }
-
-    return { Ax: ax, Ay: ay, Bx: bx, By: by };
-  }
-
-  async function executeOperation(vectorData) {
-    const endpointMap = {
-      sum: "/suma_vectores",
-      dot: "/producto_punto",
-      magnitude: "/magnitud_vectores",
-      angle: "/angulo_vectores"
-    };
-    
-    try {
-      const res = await fetch(`http://127.0.0.1:8000${endpointMap[currentOperation]}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(vectorData)
-      });
-      
-      if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-      
-      const data = await res.json();
-      showResults(data);
-      addToHistory(currentOperation, vectorData, data);
-      drawVectors(currentOperation, vectorData, data);
-    } catch (err) {
-      resultsDiv.innerHTML = `<p class="error">❌ ${err.message}</p>`;
-    }
-  }
-
-  // ---------------------------
-  // Visualización de Vectores
-  // ---------------------------
-  function drawVectors(operation, inputs, outputs) {
-    // Limpiar elementos anteriores con animación de desvanecimiento
-    vectorsGroup.selectAll("*")
-      .transition()
-      .duration(400)
-      .attr("opacity", 0)
-      .remove();
-
-    labelsGroup.selectAll("*")
-      .transition()
-      .duration(400)
-      .attr("opacity", 0)
-      .remove();
-
-    // Configurar vectores base
-    const vectors = [
-      { x: inputs.Ax, y: inputs.Ay, color: "#4fd1c5", label: "A" },
-      { x: inputs.Bx, y: inputs.By, color: "#81e6d9", label: "B" }
-    ];
-
-    // Añadir vector resultante para suma
-    if (operation === "sum") {
-      vectors.push({ 
-        x: outputs.x, 
-        y: outputs.y, 
-        color: "#f687b3", 
-        label: "A + B",
-        isResult: true 
-      });
-    }
-
-    // Dibujar todos los vectores con animaciones secuenciales
-    vectors.forEach((vec, i) => {
-      setTimeout(() => {
-        drawVector(vec, 0);
-        
-        // Dibujar líneas auxiliares y paralelogramo para suma
-        if (operation === "sum" && !vec.isResult) {
-          drawAuxiliaryLine(vec, outputs);
+    calculator.observe('mouse', (event) => {
+        if (event.type === 'move') {
+            const { x, y } = event;
+            const formatCoord = n => {
+                if (Math.abs(n) < 0.01 || Math.abs(n) > 9999) {
+                    return n.toExponential(2);
+                }
+                return n.toFixed(2);
+            };
+            document.getElementById('coords-value').textContent = 
+                `X: ${formatCoord(x)}, Y: ${formatCoord(y)}`;
         }
-      }, i * 200);
+    });
+}
+
+function setupEventListeners() {
+    // Botones de operación
+    document.querySelectorAll('.operation-button').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.operation-button').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            document.getElementById('calculate-button').disabled = false;
+        });
     });
 
-    // Ajustar vista automáticamente con animación suave
-    setTimeout(() => {
-      adjustViewport(vectors);
-    }, vectors.length * 200);
-  }
+    // Botón de calcular
+    document.getElementById('calculate-button').addEventListener('click', calculateOperation);
 
-  function drawVector(vec, delay = 0) {
-    // Línea del vector con animación suave
-    const vector = vectorsGroup.append("line")
-      .attr("class", "vector")
-      .attr("stroke", vec.color)
-      .attr("stroke-width", 2)
-      .attr("x1", 0).attr("y1", 0)
-      .attr("x2", 0).attr("y2", 0)
-      .attr("marker-end", "url(#arrowhead)")
-      .style("filter", "drop-shadow(0 0 2px rgba(79, 209, 197, 0.5))")
-      .style("will-change", "transform");
+    // Botón de agregar vector
+    document.getElementById('add-vector-button').addEventListener('click', addVector);
 
-    // Animación suave con easing
-    vector.transition()
-      .duration(800)
-      .delay(delay)
-      .ease(d3.easeElastic)
-      .attr("x2", vec.x)
-      .attr("y2", vec.y);
+    // Botón de limpiar vectores
+    document.getElementById('clear-vectors-button').addEventListener('click', clearVectors);
 
-    // Etiqueta del vector
-    addVectorLabel(vec);
-  }
+    // Botón de tema
+    document.getElementById('theme-switch').addEventListener('click', toggleTheme);
 
-  function addVectorLabel(vec) {
-    const labelGroup = labelsGroup.append("g")
-      .attr("class", "vector-label-group")
-      .style("will-change", "transform");
+    // Botón de limpiar historial
+    const clearHistoryButton = document.getElementById('clear-history');
+    if (clearHistoryButton) {
+        clearHistoryButton.addEventListener('click', clearHistory);
+    }
+}
 
-    // Fondo de la etiqueta para mejor legibilidad
-    const label = labelGroup.append("text")
-      .attr("class", "vector-label")
-      .attr("fill", vec.color)
-      .text(`${vec.label} (${fmt(vec.x, 2)}, ${fmt(vec.y, 2)})`);
-
-    // Calcular dimensiones del texto
-    const bbox = label.node().getBBox();
-    
-    // Añadir fondo semi-transparente
-    labelGroup.insert("rect", "text")
-      .attr("class", "label-background")
-      .attr("x", bbox.x - 4)
-      .attr("y", bbox.y - 2)
-      .attr("width", bbox.width + 8)
-      .attr("height", bbox.height + 4)
-      .attr("fill", "rgba(0, 0, 0, 0.7)")
-      .attr("rx", 3)
-      .attr("ry", 3);
-
-    // Posicionar etiqueta evitando solapamientos
-    const labelPos = calculateOptimalLabelPosition(vec, bbox);
-    labelGroup.attr("transform", `translate(${labelPos.x}, ${labelPos.y})`);
-  }
-
-  function calculateOptimalLabelPosition(vec, bbox) {
-    const positions = [
-      { x: vec.x + 10, y: vec.y - 10 },
-      { x: vec.x + 10, y: vec.y + 20 },
-      { x: vec.x - bbox.width - 10, y: vec.y - 10 },
-      { x: vec.x - bbox.width - 10, y: vec.y + 20 }
-    ];
-
-    // Encontrar la mejor posición que no se solape con otras etiquetas
-    const existingLabels = labelsGroup.selectAll(".vector-label-group").nodes();
-    
-    for (const pos of positions) {
-      let overlap = false;
-      
-      for (const existing of existingLabels) {
-        const existingBBox = existing.getBBox();
-        const existingTransform = d3.select(existing).attr("transform");
-        const [existingX, existingY] = existingTransform
-          ? existingTransform.match(/translate\(([^)]+)\)/)[1].split(",").map(Number)
-          : [0, 0];
-
-        // Verificar solapamiento
-        if (!(pos.x + bbox.width < existingX ||
-              pos.x > existingX + existingBBox.width ||
-              pos.y + bbox.height < existingY ||
-              pos.y > existingY + existingBBox.height)) {
-          overlap = true;
-          break;
-        }
-      }
-
-      if (!overlap) return pos;
+function addVector() {
+    if (vectorCount >= maxVectors) {
+        alert('Has alcanzado el máximo número de vectores permitidos (10)');
+        return;
     }
 
-    // Si todas las posiciones se solapan, retornar la primera
-    return positions[0];
-  }
+    const vectorsContainer = document.getElementById('vectors-container');
+    const vectorFieldset = document.createElement('fieldset');
+    vectorFieldset.className = 'vector-fieldset';
+    vectorCount++;
 
-  function drawAuxiliaryLine(vec, result) {
-    // Línea auxiliar con animación
-    const auxiliaryLine = vectorsGroup.append("line")
-      .attr("class", "aux-line")
-      .attr("stroke", vec.color)
-      .attr("stroke-dasharray", "5,2")
-      .attr("stroke-opacity", 0.6)
-      .attr("x1", vec.x)
-      .attr("y1", vec.y)
-      .attr("x2", vec.x)
-      .attr("y2", vec.y);
-
-    // Paralelogramo semi-transparente
-    const parallelogram = vectorsGroup.append("path")
-      .attr("class", "parallelogram")
-      .attr("fill", vec.color)
-      .attr("fill-opacity", 0.1)
-      .attr("stroke", vec.color)
-      .attr("stroke-opacity", 0.3)
-      .attr("d", `M 0,0 L ${vec.x},${vec.y} L ${result.x},${result.y} L ${result.x - vec.x},${result.y - vec.y} Z`)
-      .attr("opacity", 0);
-
-    // Animación de la línea auxiliar
-    auxiliaryLine.transition()
-      .duration(800)
-      .attr("x2", result.x)
-      .attr("y2", result.y);
-
-    // Animación del paralelogramo
-    parallelogram.transition()
-      .duration(800)
-      .delay(400)
-      .attr("opacity", 1);
-  }
-
-  function adjustViewport(vectors) {
-    const allPoints = [...vectors, {x: 0, y: 0}];
-    const padding = 1.3; // 30% de padding
-    
-    // Calcular extensión de los datos
-    const xExtent = d3.extent(allPoints, d => d.x);
-    const yExtent = d3.extent(allPoints, d => d.y);
-    
-    // Calcular nueva escala y transformación
-    const xRange = xExtent[1] - xExtent[0];
-    const yRange = yExtent[1] - yExtent[0];
-    
-    const scale = 0.9 / Math.max(
-      xRange / (width * 0.8),
-      yRange / (height * 0.8)
-    );
-    
-    const newTransform = d3.zoomIdentity
-      .translate(width/2, height/2)
-      .scale(scale);
-
-    svg.transition()
-      .duration(800)
-      .call(zoom.transform, newTransform);
-  }
-
-  function updateVectorLabels() {
-    labelsGroup.selectAll(".vector-label-group")
-      .each(function() {
-        const group = d3.select(this);
-        const scale = 1 / currentTransform.k;
-        
-        // Escalar el grupo completo
-        group.style("transform", `scale(${scale})`);
-        
-        // Actualizar la opacidad basada en el zoom
-        const opacity = currentTransform.k < 0.5 ? 0 : 1;
-        group.style("opacity", opacity);
-      });
-  }
-
-  // ---------------------------
-  // Funciones de Interfaz
-  // ---------------------------
-  function updateCoordinateDisplay(event) {
-    const [x, y] = d3.pointer(event);
-    const inverted = currentTransform.invert([x, y]);
-    const formatCoord = n => {
-      if (Math.abs(n) < 0.01 || Math.abs(n) > 9999) {
-        return n.toExponential(2);
-      }
-      return n.toFixed(2);
-    };
-    coordsDisplay.textContent = `X: ${formatCoord(inverted[0])}, Y: ${formatCoord(inverted[1])}`;
-  }
-
-  function showResults(data) {
-    resultsDiv.innerHTML = Object.entries(data)
-      .map(([key, value]) => `
-        <div class="result-item">
-          <h3>${key.replace(/_/g, ' ')}</h3>
-          <p>${fmt(value)}</p>
+    vectorFieldset.innerHTML = `
+        <button type="button" class="remove-vector" title="Eliminar vector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+        </button>
+        <legend>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5l7 7-7 7M5 12h14"/>
+            </svg>
+            Vector ${vectorCount}
+        </legend>
+        <div>
+            <label for="x${vectorCount}">Componente X:</label>
+            <input type="number" id="x${vectorCount}" step="any" required>
         </div>
-      `).join("");
-  }
+        <div>
+            <label for="y${vectorCount}">Componente Y:</label>
+            <input type="number" id="y${vectorCount}" step="any" required>
+        </div>
+    `;
 
-  function resetZoom() {
-    svg.transition()
-      .duration(800)
-      .call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(1));
-  }
+    vectorsContainer.appendChild(vectorFieldset);
 
-  function dismissTutorial() {
-    tutorialModal.classList.replace('animate__fadeIn', 'animate__fadeOut');
-    setTimeout(() => tutorialModal.style.display = 'none', 500);
-  }
+    // Agregar evento para eliminar vector
+    vectorFieldset.querySelector('.remove-vector').addEventListener('click', () => {
+        vectorFieldset.remove();
+        vectorCount--;
+        updateVectorNumbers();
+    });
+}
 
-  // ---------------------------
-  // Manejo del Historial
-  // ---------------------------
-  function addToHistory(op, inputs, outputs) {
-    const entry = {
-      op,
-      inputs,
-      outputs,
-      timestamp: new Date().toLocaleTimeString()
+function clearVectors() {
+    const vectorsContainer = document.getElementById('vectors-container');
+    vectorsContainer.innerHTML = '';
+    vectorCount = 0;
+    // Agregar dos vectores por defecto al limpiar
+    addVector();
+    addVector();
+}
+
+function updateVectorNumbers() {
+    const vectors = document.querySelectorAll('.vector-fieldset');
+    vectors.forEach((vector, index) => {
+        const legend = vector.querySelector('legend');
+        legend.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5l7 7-7 7M5 12h14"/>
+            </svg>
+            Vector ${index + 1}
+        `;
+        vector.querySelectorAll('input').forEach(input => {
+            const id = input.id;
+            input.id = id.replace(/\d+/, index + 1);
+        });
+    });
+}
+
+function getVectors() {
+    const vectors = [];
+    document.querySelectorAll('.vector-fieldset').forEach(fieldset => {
+        const x = parseFloat(fieldset.querySelector('input[id^="x"]').value) || 0;
+        const y = parseFloat(fieldset.querySelector('input[id^="y"]').value) || 0;
+        vectors.push({ x, y });
+    });
+    return vectors;
+}
+
+async function calculateOperation() {
+    const vectors = getVectors();
+    if (vectors.length < 2) {
+        alert('Se necesitan al menos 2 vectores para realizar operaciones');
+        return;
+    }
+
+    const activeOperation = document.querySelector('.operation-button.active');
+    if (!activeOperation) {
+        alert('Por favor, selecciona una operación');
+        return;
+    }
+
+    const operation = activeOperation.dataset.operation;
+    let result;
+    const loader = document.getElementById('global-loader');
+    try {
+        loader.style.display = 'flex';
+        if (operation === 'sum') {
+            const response = await fetch('/suma_lista', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vectores: vectors })
+            });
+            const data = await response.json();
+            if (!data.success) throw new Error(data.detail || 'Error en la suma');
+            result = { x: data.result.Rx, y: data.result.Ry };
+        } else if (operation === 'dot') {
+            const v = vectors.slice(0, 2);
+            const response = await fetch('/producto_punto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Ax: v[0].x, Ay: v[0].y, Bx: v[1].x, By: v[1].y })
+            });
+            const data = await response.json();
+            if (!data.success) throw new Error(data.detail || 'Error en el producto escalar');
+            result = data.result.producto_punto;
+        } else if (operation === 'magnitude') {
+            const v = vectors.slice(0, 2);
+            const response = await fetch('/magnitud_vectores', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Ax: v[0].x, Ay: v[0].y, Bx: v[1].x, By: v[1].y })
+            });
+            const data = await response.json();
+            if (!data.success) throw new Error(data.detail || 'Error en la magnitud');
+            result = [
+                { x: v[0].x, y: v[0].y, magnitude: data.result.magnitud_A },
+                { x: v[1].x, y: v[1].y, magnitude: data.result.magnitud_B }
+            ];
+        } else if (operation === 'angle') {
+            const v = vectors.slice(0, 2);
+            const response = await fetch('/angulo_vectores', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Ax: v[0].x, Ay: v[0].y, Bx: v[1].x, By: v[1].y })
+            });
+            const data = await response.json();
+            if (!data.success) throw new Error(data.detail || 'Error en el ángulo');
+            result = data.result.angulo_grados;
+        }
+        displayResult(result, operation);
+        updateGraph(vectors, result, operation);
+    } catch (error) {
+        alert('Error: ' + (error.message || error));
+    } finally {
+        loader.style.display = 'none';
+    }
+}
+
+function displayResult(result, operation) {
+    // Limpiar resultados anteriores
+    document.querySelectorAll('.result-content').forEach(el => el.innerHTML = '');
+    document.querySelectorAll('.result-card').forEach(card => card.style.display = 'none');
+
+    switch (operation) {
+        case 'sum':
+            const magnitude = Math.sqrt(result.x * result.x + result.y * result.y);
+            const direction = Math.atan2(result.y, result.x) * 180 / Math.PI;
+            
+            document.getElementById('vector-result-content').innerHTML = `
+                <div class="result-value">(${result.x.toFixed(2)}, ${result.y.toFixed(2)})</div>
+            `;
+            document.querySelector('.vector-result').style.display = 'block';
+            
+            document.getElementById('magnitude-result-content').innerHTML = `
+                <div class="result-value">${magnitude.toFixed(2)}</div>
+            `;
+            document.querySelector('.magnitude-result').style.display = 'block';
+            
+            document.getElementById('angle-result-content').innerHTML = `
+                <div class="result-value">${direction.toFixed(2)}°</div>
+            `;
+            document.querySelector('.angle-result').style.display = 'block';
+            break;
+
+        case 'dot':
+            document.getElementById('dot-result-content').innerHTML = `
+                <div class="result-value">${result.toFixed(2)}</div>
+            `;
+            document.querySelector('.dot-result').style.display = 'block';
+            break;
+
+        case 'magnitude':
+            result.forEach((vec, i) => {
+                document.getElementById('magnitude-result-content').innerHTML += `
+                    <div class="result-value">Vector ${i + 1}: ${vec.magnitude.toFixed(2)}</div>
+                `;
+            });
+            document.querySelector('.magnitude-result').style.display = 'block';
+            break;
+
+        case 'angle':
+            document.getElementById('angle-result-content').innerHTML = `
+                <div class="result-value">${result.toFixed(2)}°</div>
+            `;
+            document.querySelector('.angle-result').style.display = 'block';
+            break;
+    }
+
+    // Agregar al historial
+    addToHistory(operation, result);
+}
+
+function addToHistory(operation, result) {
+    const timestamp = new Date().toLocaleTimeString();
+    const vectors = getVectors();
+    let historyEntry = {
+        timestamp,
+        operation,
+        vectors: vectors.map(v => ({ x: v.x, y: v.y })),
+        result
     };
-    
-    history.unshift(entry);
-    if (history.length > 10) history.pop();
-    localStorage.setItem("vectorHistory", JSON.stringify(history));
+
+    history.unshift(historyEntry);
+    if (history.length > 10) history.pop(); // Mantener solo los últimos 10
+    localStorage.setItem('vectorHistory', JSON.stringify(history));
     renderHistory();
+}
+
+function updateGraph(vectors, result, operation) {
+    try {
+        // Limpiar expresiones anteriores
+        currentExpressions.forEach(id => {
+            try {
+                calculator.removeExpression({ id });
+            } catch (e) {
+                console.warn('Error al eliminar expresión:', e);
+            }
+        });
+        currentExpressions = [];
+
+        // Dibujar vectores de entrada
+        vectors.forEach((vector, index) => {
+            const color = index === 0 ? '#4fd1c5' : (index === 1 ? '#81e6d9' : '#f6e05e');
+            drawVector(vector, `vector${index + 1}`, color);
+        });
+
+        if (operation === 'sum') {
+            drawVector(result, 'result', '#f687b3', 'Resultante');
+            // Línea punteada del paralelogramo (de la punta de A a la punta de R)
+            if (vectors.length >= 2) {
+                const A = vectors[0];
+                const B = vectors[1];
+                calculator.setExpression({
+                    id: 'paralelogramo',
+                    latex: `\\left(${A.x} + t*${B.x}, ${A.y} + t*${B.y}\\right)`,
+                    parametricDomain: { min: 0, max: 1 },
+                    color: '#f6e05e',
+                    lineStyle: 'dashed',
+                    lineWidth: 2
+                });
+                currentExpressions.push('paralelogramo');
+            }
+        } else if (operation === 'angle') {
+            drawAngleArc(vectors[0], vectors[1], result);
+        } else if (operation === 'dot') {
+            // Producto escalar: dibujar ángulo y mostrar fórmula
+            if (vectors.length >= 2) {
+                // Dibujar arco del ángulo
+                const v1 = vectors[0];
+                const v2 = vectors[1];
+                // Calcular ángulo
+                const dot = v1.x * v2.x + v1.y * v2.y;
+                const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+                const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
+                let theta = 0;
+                if (mag1 > 0 && mag2 > 0) {
+                    theta = Math.acos(dot / (mag1 * mag2)) * (180 / Math.PI);
+                }
+                drawAngleArc(v1, v2, theta);
+                // Mostrar fórmula y resultado
+                const latex = `A \\cdot B = |A||B| \\cos(\\theta) = ${fmt(mag1)} \\times ${fmt(mag2)} \\times \\cos(${theta.toFixed(2)}^\\circ) = ${result.toFixed(2)}`;
+                calculator.setExpression({
+                    id: 'dot_formula',
+                    latex: `y = 0`,
+                    label: latex,
+                    showLabel: true,
+                    color: '#f687b3',
+                    dragMode: Desmos.DragModes.NONE
+                });
+                currentExpressions.push('dot_formula');
+            }
+        }
+
+        // Ajustar vista
+        adjustViewport(vectors, result, operation);
+
+    } catch (error) {
+        console.error('Error al actualizar gráfico:', error);
+    }
+}
+
+function drawVector(vector, id, color, labelName = null) {
+    try {
+        // Limpiar expresiones anteriores para este vector
+        ['_body', '_head1', '_head2', '_label'].forEach(suffix => {
+            try {
+                calculator.removeExpression({ id: `${id}${suffix}` });
+            } catch (e) {
+                console.warn(`Error al eliminar expresión ${id}${suffix}:`, e);
+            }
+        });
+
+        // Cuerpo de la flecha (línea principal)
+        const bodyExpression = {
+            id: `${id}_body`,
+            latex: `(t*${vector.x}, t*${vector.y})`,
+            parametricDomain: { min: 0, max: 1 },
+            color: color,
+            lineStyle: 'solid',
+            lineWidth: 3
+        };
+        calculator.setExpression(bodyExpression);
+        currentExpressions.push(`${id}_body`);
+
+        // Calcular la cabeza de la flecha
+        const magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+        if (magnitude > 0.0001) {
+            const headLength = Math.max(0.3, magnitude * 0.15);
+            const angle = Math.atan2(vector.y, vector.x);
+            
+            // Puntos para la cabeza de la flecha
+            const headAngle1 = angle + Math.PI - Math.PI/6;
+            const headAngle2 = angle + Math.PI + Math.PI/6;
+            
+            const hx1 = vector.x + headLength * Math.cos(headAngle1);
+            const hy1 = vector.y + headLength * Math.sin(headAngle1);
+            const hx2 = vector.x + headLength * Math.cos(headAngle2);
+            const hy2 = vector.y + headLength * Math.sin(headAngle2);
+
+            // Líneas de la cabeza
+            const head1Expression = {
+                id: `${id}_head1`,
+                latex: `(${vector.x} + t*(${hx1 - vector.x}), ${vector.y} + t*(${hy1 - vector.y}))`,
+                parametricDomain: { min: 0, max: 1 },
+                color: color,
+                lineStyle: 'solid',
+                lineWidth: 3
+            };
+            calculator.setExpression(head1Expression);
+            currentExpressions.push(`${id}_head1`);
+
+            const head2Expression = {
+                id: `${id}_head2`,
+                latex: `(${vector.x} + t*(${hx2 - vector.x}), ${vector.y} + t*(${hy2 - vector.y}))`,
+                parametricDomain: { min: 0, max: 1 },
+                color: color,
+                lineStyle: 'solid',
+                lineWidth: 3
+            };
+            calculator.setExpression(head2Expression);
+            currentExpressions.push(`${id}_head2`);
+        }
+
+        // Etiqueta del vector
+        // El nombre será A, B, C... o "Resultante" si es el vector suma
+        let label = labelName;
+        if (!label) {
+            // Si es vector1, vector2, etc.
+            const match = id.match(/vector(\d+)/);
+            if (match) {
+                const idx = parseInt(match[1], 10);
+                label = String.fromCharCode(65 + idx - 1); // A, B, C...
+            } else if (id === 'result') {
+                label = 'Resultante';
+            } else {
+                label = id;
+            }
+        }
+        // Mostrar componentes
+        const labelText = `${label} (${vector.x.toFixed(2)}, ${vector.y.toFixed(2)})`;
+        calculator.setExpression({
+            id: `${id}_label`,
+            latex: `(${vector.x/2}, ${vector.y/2})`,
+            color: color,
+            label: labelText,
+            showLabel: true,
+            dragMode: Desmos.DragModes.NONE
+        });
+        currentExpressions.push(`${id}_label`);
+    } catch (error) {
+        console.error('Error al dibujar vector:', error);
+    }
+}
+
+function adjustViewport(vectors, result, operation) {
+    try {
+        const points = [
+            [0, 0],
+            ...vectors.map(v => [v.x, v.y])
+        ];
+
+        if (operation === 'sum') {
+            points.push([result.x, result.y]);
+        }
+
+        // Calcular límites
+        const xCoords = points.map(p => p[0]);
+        const yCoords = points.map(p => p[1]);
+        const xMin = Math.min(...xCoords);
+        const xMax = Math.max(...xCoords);
+        const yMin = Math.min(...yCoords);
+        const yMax = Math.max(...yCoords);
+
+        // Agregar margen
+        const margin = Math.max(
+            Math.abs(xMax - xMin),
+            Math.abs(yMax - yMin)
+        ) * 0.2;
+
+        // Ajustar vista
+        calculator.setMathBounds({
+            left: xMin - margin,
+            right: xMax + margin,
+            bottom: yMin - margin,
+            top: yMax + margin
+        });
+    } catch (error) {
+        console.error('Error al ajustar viewport:', error);
+    }
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon();
+    updateCalculatorTheme();
+}
+
+function updateThemeIcon() {
+    const themeSwitch = document.getElementById('theme-switch');
+    const svg = themeSwitch.querySelector('svg');
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    
+    if (currentTheme === 'dark') {
+        svg.innerHTML = '<path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>';
+    } else {
+        svg.innerHTML = '<path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/>';
+    }
+}
+
+function updateCalculatorTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    calculator.setBackgroundColor(currentTheme === 'dark' ? 'transparent' : '#ffffff');
   }
 
   function renderHistory() {
-    historyList.innerHTML = history.map(entry => `
-      <li>
-        <strong>[${entry.timestamp}] ${entry.op.toUpperCase()}</strong><br>
-        A=(${fmt(entry.inputs.Ax)}, ${fmt(entry.inputs.Ay)}), 
-        B=(${fmt(entry.inputs.Bx)}, ${fmt(entry.inputs.By)})<br>
-        ${Object.entries(entry.outputs).map(([k, v]) => 
-          `${k.replace(/_/g, ' ')}: ${fmt(v)}`).join(", ")}
+    const historyList = document.getElementById('history-list');
+    if (!historyList) return;
+
+    historyList.innerHTML = history.map(entry => {
+        let resultText = '';
+        switch (entry.operation) {
+            case 'sum':
+                resultText = `Vector: (${entry.result.x.toFixed(2)}, ${entry.result.y.toFixed(2)})`;
+                break;
+            case 'dot':
+                resultText = `Producto: ${entry.result.toFixed(2)}`;
+                break;
+            case 'magnitude':
+                resultText = `Magnitudes: ${entry.result.map(v => v.magnitude.toFixed(2)).join(', ')}`;
+                break;
+            case 'angle':
+                resultText = `Ángulo: ${entry.result.toFixed(2)}°`;
+                break;
+        }
+
+        return `
+            <li class="animate__animated animate__fadeIn">
+                <div class="history-time">${entry.timestamp}</div>
+                <div class="history-operation">${entry.operation.toUpperCase()}</div>
+                <div class="history-result">${resultText}</div>
       </li>
-    `).join("");
+        `;
+    }).join('');
   }
 
   function clearHistory() {
     history = [];
-    localStorage.removeItem("vectorHistory");
+    localStorage.removeItem('vectorHistory');
     renderHistory();
   }
-});
+
+function setupTutorial() {
+    const tutorialModal = document.getElementById('tutorial-modal');
+    const prevButton = document.getElementById('prev-step');
+    const nextButton = document.getElementById('next-step');
+    const dismissButton = document.getElementById('dismiss-tutorial');
+    const closeButton = document.getElementById('close-tutorial');
+    const reopenButton = document.getElementById('reopen-tutorial');
+
+    // Mostrar el tutorial cada vez que se carga la página
+    tutorialModal.style.display = 'flex';
+
+    // Navegación del tutorial
+    prevButton.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            updateTutorialStep();
+        }
+    });
+
+    nextButton.addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            updateTutorialStep();
+        }
+    });
+
+    dismissButton.addEventListener('click', () => {
+        tutorialModal.style.display = 'none';
+    });
+
+    closeButton.addEventListener('click', () => {
+        tutorialModal.style.display = 'none';
+    });
+
+    reopenButton.addEventListener('click', () => {
+        currentStep = 1;
+        updateTutorialStep();
+        tutorialModal.style.display = 'flex';
+        tutorialModal.classList.remove('animate__fadeOut');
+        tutorialModal.classList.add('animate__fadeIn');
+    });
+}
+
+function updateTutorialStep() {
+    // Actualizar pasos
+    document.querySelectorAll('.tutorial-step').forEach(step => {
+        step.classList.remove('active');
+        if (parseInt(step.dataset.step) === currentStep) {
+            step.classList.add('active');
+        }
+    });
+
+    // Actualizar botones
+    const prevButton = document.getElementById('prev-step');
+    const nextButton = document.getElementById('next-step');
+    const dismissButton = document.getElementById('dismiss-tutorial');
+
+    prevButton.disabled = currentStep === 1;
+    if (currentStep === totalSteps) {
+        nextButton.style.display = 'none';
+        dismissButton.style.display = 'block';
+    } else {
+        nextButton.style.display = 'block';
+        dismissButton.style.display = 'none';
+    }
+}
+
+/**
+ * Dibuja los arcos de ángulo entre dos vectores, asegurando que el arco esté siempre entre ellos,
+ * partiendo del origen y siguiendo el sentido correcto. Las etiquetas se posicionan en el centro del sector.
+ */
+function drawAngleArc(v1, v2, angleMenor) {
+    // Ángulos respecto al eje X
+    const theta1 = Math.atan2(v1.y, v1.x);
+    const theta2 = Math.atan2(v2.y, v2.x);
+    // Calcular diferencia y normalizar
+    let delta = theta2 - theta1;
+    while (delta < 0) delta += 2 * Math.PI;
+    // Menor y mayor ángulo
+    const menor = delta <= Math.PI ? delta : 2 * Math.PI - delta;
+    const mayor = 2 * Math.PI - menor;
+    // Sentidos
+    let startMenor = theta1;
+    let endMenor = theta1 + menor;
+    let startMayor = theta1 + menor;
+    let endMayor = theta1 + 2 * Math.PI;
+    // Radio fijo proporcional al menor vector
+    const r = Math.max(1, Math.min(
+        Math.sqrt(v1.x * v1.x + v1.y * v1.y),
+        Math.sqrt(v2.x * v2.x + v2.y * v2.y)
+    ) * 0.3);
+    // Arco menor (agudo)
+    calculator.setExpression({
+        id: 'angle_arc_menor',
+        latex: `\\left(${r} \\cos(t), ${r} \\sin(t)\\right)`,
+        parametricDomain: { min: startMenor, max: endMenor },
+        color: '#f687b3',
+        lineStyle: 'solid',
+        lineWidth: 3
+    });
+    currentExpressions.push('angle_arc_menor');
+    // Etiqueta menor
+    const labelAngleMenor = startMenor + menor / 2;
+    const labelRadiusMenor = r * 1.18;
+    calculator.setExpression({
+        id: 'angle_label_menor',
+        latex: `\\left(${labelRadiusMenor} \\cos(${labelAngleMenor}), ${labelRadiusMenor} \\sin(${labelAngleMenor})\\right)`,
+        color: '#f687b3',
+        label: `${(menor * 180 / Math.PI).toFixed(2)}°`,
+        showLabel: true,
+        dragMode: Desmos.DragModes.NONE
+    });
+    currentExpressions.push('angle_label_menor');
+    // Arco mayor (obtuso)
+    calculator.setExpression({
+        id: 'angle_arc_mayor',
+        latex: `\\left(${r * 0.85} \\cos(t), ${r * 0.85} \\sin(t)\\right)`,
+        parametricDomain: { min: endMenor, max: endMayor },
+        color: '#81e6d9',
+        lineStyle: 'dashed',
+        lineWidth: 2,
+        opacity: 0.5
+    });
+    currentExpressions.push('angle_arc_mayor');
+    // Etiqueta mayor
+    const labelAngleMayor = endMenor + (mayor / 2);
+    const labelRadiusMayor = r * 0.95;
+    calculator.setExpression({
+        id: 'angle_label_mayor',
+        latex: `\\left(${labelRadiusMayor} \\cos(${labelAngleMayor}), ${labelRadiusMayor} \\sin(${labelAngleMayor})\\right)`,
+        color: '#81e6d9',
+        label: `${(mayor * 180 / Math.PI).toFixed(2)}°`,
+        showLabel: true,
+        dragMode: Desmos.DragModes.NONE
+    });
+    currentExpressions.push('angle_label_mayor');
+}
