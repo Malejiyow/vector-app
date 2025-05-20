@@ -1,6 +1,18 @@
-// script.js
+/**
+ * Vector App - Simulador Interactivo de Operaciones Vectoriales
+ * 
+ * Este módulo implementa la lógica principal de la aplicación Vector App,
+ * permitiendo realizar operaciones vectoriales en ℝ² con visualización interactiva
+ * utilizando la API de Desmos.
+ * Si no entiendes algo del codigo me gustaria explicarte pero paila tambien hay cosas que no entiendo :( 
+ */
 
-// Formatea un número a notación científica cuando sea necesario
+/**
+ * Formatea un número a notación científica cuando su magnitud es muy pequeña o grande
+ * @param {number} n - Número a formatear
+ * @param {number} sig - Número de cifras significativas (default: 3)
+ * @returns {string} Número formateado
+ */
 function fmt(n, sig = 3) {
   if (Math.abs(n) < 0.01 || Math.abs(n) > 9999) {
     return n.toExponential(sig - 1);
@@ -8,23 +20,26 @@ function fmt(n, sig = 3) {
   return parseFloat(n.toPrecision(sig));
 }
 
-// Variables globales
-let calculator;
-let vectorCount = 0;
-const maxVectors = 10;
-let currentExpressions = [];
-let history = JSON.parse(localStorage.getItem('vectorHistory') || '[]');
+// Estado global de la aplicación
+let calculator; // Instancia del calculador Desmos
+let vectorCount = 0; // Contador de vectores actuales
+const maxVectors = 10; // Límite máximo de vectores
+let currentExpressions = []; // Expresiones activas en el gráfico
+let history = JSON.parse(localStorage.getItem('vectorHistory') || '[]'); // Historial de operaciones
 
-// Variables globales para el tutorial
+// Estado del tutorial interactivo
 let currentStep = 1;
 const totalSteps = 3;
 
-// Inicialización
+/**
+ * Inicializa la aplicación cuando el DOM está listo
+ * Configura el calculador, eventos, tutorial y estado inicial
+ */
 document.addEventListener('DOMContentLoaded', () => {
     initializeCalculator();
     setupEventListeners();
     setupTutorial();
-    // Agregar dos vectores por defecto
+    // Inicializar con dos vectores por defecto
     addVector();
     addVector();
     renderHistory();
@@ -34,6 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCalculatorTheme();
 });
 
+/**
+ * Inicializa el calculador Desmos con la configuración personalizada
+ * y establece los observadores para la interacción del usuario
+ */
 function initializeCalculator() {
     calculator = Desmos.GraphingCalculator(document.getElementById('desmos-calculator'), {
         keypad: false,
@@ -50,7 +69,7 @@ function initializeCalculator() {
         }
     });
 
-    // Configurar vista inicial
+    // Configurar vista inicial del plano cartesiano
     calculator.setMathBounds({
         left: -10,
         right: 10,
@@ -58,7 +77,7 @@ function initializeCalculator() {
         top: 10
     });
 
-    // Mostrar coordenadas en tiempo real
+    // Observador para mostrar coordenadas en tiempo real
     calculator.observe('mouse', (event) => {
         if (event.type === 'move') {
             const { x, y } = event;
@@ -74,8 +93,12 @@ function initializeCalculator() {
     });
 }
 
+/**
+ * Configura todos los event listeners de la aplicación
+ * Incluye botones de operación, cálculo, gestión de vectores y tema
+ */
 function setupEventListeners() {
-    // Botones de operación
+    // Configurar botones de operación vectorial
     document.querySelectorAll('.operation-button').forEach(button => {
         button.addEventListener('click', () => {
             document.querySelectorAll('.operation-button').forEach(btn => btn.classList.remove('active'));
@@ -84,25 +107,23 @@ function setupEventListeners() {
         });
     });
 
-    // Botón de calcular
+    // Configurar botones principales
     document.getElementById('calculate-button').addEventListener('click', calculateOperation);
-
-    // Botón de agregar vector
     document.getElementById('add-vector-button').addEventListener('click', addVector);
-
-    // Botón de limpiar vectores
     document.getElementById('clear-vectors-button').addEventListener('click', clearVectors);
-
-    // Botón de tema
     document.getElementById('theme-switch').addEventListener('click', toggleTheme);
 
-    // Botón de limpiar historial
+    // Configurar botón de limpieza de historial
     const clearHistoryButton = document.getElementById('clear-history');
     if (clearHistoryButton) {
         clearHistoryButton.addEventListener('click', clearHistory);
     }
 }
 
+/**
+ * Agrega un nuevo vector al contenedor de vectores
+ * Incluye campos para componentes X e Y y botón de eliminación
+ */
 function addVector() {
     if (vectorCount >= maxVectors) {
         alert('Has alcanzado el máximo número de vectores permitidos (10)');
@@ -138,7 +159,7 @@ function addVector() {
 
     vectorsContainer.appendChild(vectorFieldset);
 
-    // Agregar evento para eliminar vector
+    // Configurar evento de eliminación
     vectorFieldset.querySelector('.remove-vector').addEventListener('click', () => {
         vectorFieldset.remove();
         vectorCount--;
@@ -146,15 +167,22 @@ function addVector() {
     });
 }
 
+/**
+ * Limpia todos los vectores y reinicia el contador
+ * Agrega dos vectores por defecto al finalizar
+ */
 function clearVectors() {
     const vectorsContainer = document.getElementById('vectors-container');
     vectorsContainer.innerHTML = '';
     vectorCount = 0;
-    // Agregar dos vectores por defecto al limpiar
     addVector();
     addVector();
 }
 
+/**
+ * Actualiza la numeración de los vectores después de eliminar uno
+ * Mantiene la secuencia correcta de etiquetas y IDs
+ */
 function updateVectorNumbers() {
     const vectors = document.querySelectorAll('.vector-fieldset');
     vectors.forEach((vector, index) => {
@@ -172,6 +200,10 @@ function updateVectorNumbers() {
     });
 }
 
+/**
+ * Obtiene los vectores actuales del formulario
+ * @returns {Array<{x: number, y: number}>} Array de vectores con sus componentes
+ */
 function getVectors() {
     const vectors = [];
     document.querySelectorAll('.vector-fieldset').forEach(fieldset => {
@@ -182,6 +214,10 @@ function getVectors() {
     return vectors;
 }
 
+/**
+ * Realiza la operación vectorial seleccionada
+ * Comunica con el backend para cálculos y actualiza la visualización
+ */
 async function calculateOperation() {
     const vectors = getVectors();
     if (vectors.length < 2) {
@@ -252,6 +288,11 @@ async function calculateOperation() {
     }
 }
 
+/**
+ * Muestra los resultados de la operación vectorial en la interfaz
+ * @param {Object|number|Array} result - Resultado de la operación
+ * @param {string} operation - Tipo de operación realizada
+ */
 function displayResult(result, operation) {
     // Limpiar resultados anteriores
     document.querySelectorAll('.result-content').forEach(el => el.innerHTML = '');
@@ -302,10 +343,15 @@ function displayResult(result, operation) {
             break;
     }
 
-    // Agregar al historial
+    // Registrar en el historial
     addToHistory(operation, result);
 }
 
+/**
+ * Agrega una operación al historial local
+ * @param {string} operation - Tipo de operación
+ * @param {Object|number|Array} result - Resultado de la operación
+ */
 function addToHistory(operation, result) {
     const timestamp = new Date().toLocaleTimeString();
     const vectors = getVectors();
@@ -317,11 +363,17 @@ function addToHistory(operation, result) {
     };
 
     history.unshift(historyEntry);
-    if (history.length > 10) history.pop(); // Mantener solo los últimos 10
+    if (history.length > 10) history.pop(); // Mantener solo los últimos 10 registros
     localStorage.setItem('vectorHistory', JSON.stringify(history));
     renderHistory();
 }
 
+/**
+ * Actualiza la visualización gráfica con los vectores y resultados
+ * @param {Array<{x: number, y: number}>} vectors - Vectores de entrada
+ * @param {Object|number|Array} result - Resultado de la operación
+ * @param {string} operation - Tipo de operación realizada
+ */
 function updateGraph(vectors, result, operation) {
     try {
         // Limpiar expresiones anteriores
@@ -342,7 +394,7 @@ function updateGraph(vectors, result, operation) {
 
         if (operation === 'sum') {
             drawVector(result, 'result', '#f687b3', 'Resultante');
-            // Línea punteada del paralelogramo (de la punta de A a la punta de R)
+            // Dibujar paralelogramo para suma vectorial
             if (vectors.length >= 2) {
                 const A = vectors[0];
                 const B = vectors[1];
@@ -359,12 +411,10 @@ function updateGraph(vectors, result, operation) {
         } else if (operation === 'angle') {
             drawAngleArc(vectors[0], vectors[1], result);
         } else if (operation === 'dot') {
-            // Producto escalar: dibujar ángulo y mostrar fórmula
+            // Visualización del producto escalar
             if (vectors.length >= 2) {
-                // Dibujar arco del ángulo
                 const v1 = vectors[0];
                 const v2 = vectors[1];
-                // Calcular ángulo
                 const dot = v1.x * v2.x + v1.y * v2.y;
                 const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
                 const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
@@ -373,7 +423,7 @@ function updateGraph(vectors, result, operation) {
                     theta = Math.acos(dot / (mag1 * mag2)) * (180 / Math.PI);
                 }
                 drawAngleArc(v1, v2, theta);
-                // Mostrar fórmula y resultado
+                // Mostrar fórmula del producto escalar
                 const latex = `A \\cdot B = |A||B| \\cos(\\theta) = ${fmt(mag1)} \\times ${fmt(mag2)} \\times \\cos(${theta.toFixed(2)}^\\circ) = ${result.toFixed(2)}`;
                 calculator.setExpression({
                     id: 'dot_formula',
@@ -387,7 +437,7 @@ function updateGraph(vectors, result, operation) {
             }
         }
 
-        // Ajustar vista
+        // Ajustar vista del gráfico
         adjustViewport(vectors, result, operation);
 
     } catch (error) {
@@ -395,9 +445,16 @@ function updateGraph(vectors, result, operation) {
     }
 }
 
+/**
+ * Dibuja un vector en el plano cartesiano con su etiqueta
+ * @param {{x: number, y: number}} vector - Vector a dibujar
+ * @param {string} id - Identificador único para el vector
+ * @param {string} color - Color del vector
+ * @param {string} [labelName] - Nombre personalizado para la etiqueta
+ */
 function drawVector(vector, id, color, labelName = null) {
     try {
-        // Limpiar expresiones anteriores para este vector
+        // Limpiar expresiones anteriores
         ['_body', '_head1', '_head2', '_label'].forEach(suffix => {
             try {
                 calculator.removeExpression({ id: `${id}${suffix}` });
@@ -406,7 +463,7 @@ function drawVector(vector, id, color, labelName = null) {
             }
         });
 
-        // Cuerpo de la flecha (línea principal)
+        // Dibujar cuerpo del vector
         const bodyExpression = {
             id: `${id}_body`,
             latex: `(t*${vector.x}, t*${vector.y})`,
@@ -418,13 +475,13 @@ function drawVector(vector, id, color, labelName = null) {
         calculator.setExpression(bodyExpression);
         currentExpressions.push(`${id}_body`);
 
-        // Calcular la cabeza de la flecha
+        // Dibujar punta de la flecha
         const magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
         if (magnitude > 0.0001) {
             const headLength = Math.max(0.3, magnitude * 0.15);
             const angle = Math.atan2(vector.y, vector.x);
             
-            // Puntos para la cabeza de la flecha
+            // Calcular puntos de la punta
             const headAngle1 = angle + Math.PI - Math.PI/6;
             const headAngle2 = angle + Math.PI + Math.PI/6;
             
@@ -433,7 +490,7 @@ function drawVector(vector, id, color, labelName = null) {
             const hx2 = vector.x + headLength * Math.cos(headAngle2);
             const hy2 = vector.y + headLength * Math.sin(headAngle2);
 
-            // Líneas de la cabeza
+            // Dibujar líneas de la punta
             const head1Expression = {
                 id: `${id}_head1`,
                 latex: `(${vector.x} + t*(${hx1 - vector.x}), ${vector.y} + t*(${hy1 - vector.y}))`,
@@ -457,11 +514,9 @@ function drawVector(vector, id, color, labelName = null) {
             currentExpressions.push(`${id}_head2`);
         }
 
-        // Etiqueta del vector
-        // El nombre será A, B, C... o "Resultante" si es el vector suma
+        // Agregar etiqueta del vector
         let label = labelName;
         if (!label) {
-            // Si es vector1, vector2, etc.
             const match = id.match(/vector(\d+)/);
             if (match) {
                 const idx = parseInt(match[1], 10);
@@ -472,7 +527,6 @@ function drawVector(vector, id, color, labelName = null) {
                 label = id;
             }
         }
-        // Mostrar componentes
         const labelText = `${label} (${vector.x.toFixed(2)}, ${vector.y.toFixed(2)})`;
         calculator.setExpression({
             id: `${id}_label`,
@@ -488,6 +542,12 @@ function drawVector(vector, id, color, labelName = null) {
     }
 }
 
+/**
+ * Ajusta la vista del gráfico para mostrar todos los vectores
+ * @param {Array<{x: number, y: number}>} vectors - Vectores a mostrar
+ * @param {Object|number|Array} result - Resultado de la operación
+ * @param {string} operation - Tipo de operación realizada
+ */
 function adjustViewport(vectors, result, operation) {
     try {
         const points = [
@@ -499,7 +559,7 @@ function adjustViewport(vectors, result, operation) {
             points.push([result.x, result.y]);
         }
 
-        // Calcular límites
+        // Calcular límites del viewport
         const xCoords = points.map(p => p[0]);
         const yCoords = points.map(p => p[1]);
         const xMin = Math.min(...xCoords);
@@ -507,7 +567,7 @@ function adjustViewport(vectors, result, operation) {
         const yMin = Math.min(...yCoords);
         const yMax = Math.max(...yCoords);
 
-        // Agregar margen
+        // Agregar margen para mejor visualización
         const margin = Math.max(
             Math.abs(xMax - xMin),
             Math.abs(yMax - yMin)
@@ -525,6 +585,10 @@ function adjustViewport(vectors, result, operation) {
     }
 }
 
+/**
+ * Alterna entre los temas claro y oscuro
+ * Actualiza el ícono y la apariencia del calculador
+ */
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -534,6 +598,9 @@ function toggleTheme() {
     updateCalculatorTheme();
 }
 
+/**
+ * Actualiza el ícono del selector de tema según el tema actual
+ */
 function updateThemeIcon() {
     const themeSwitch = document.getElementById('theme-switch');
     const svg = themeSwitch.querySelector('svg');
@@ -546,12 +613,18 @@ function updateThemeIcon() {
     }
 }
 
+/**
+ * Actualiza el tema del calculador Desmos
+ */
 function updateCalculatorTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     calculator.setBackgroundColor(currentTheme === 'dark' ? 'transparent' : '#ffffff');
-  }
+}
 
-  function renderHistory() {
+/**
+ * Renderiza el historial de operaciones en la interfaz
+ */
+function renderHistory() {
     const historyList = document.getElementById('history-list');
     if (!historyList) return;
 
@@ -577,17 +650,23 @@ function updateCalculatorTheme() {
                 <div class="history-time">${entry.timestamp}</div>
                 <div class="history-operation">${entry.operation.toUpperCase()}</div>
                 <div class="history-result">${resultText}</div>
-      </li>
+            </li>
         `;
     }).join('');
-  }
+}
 
-  function clearHistory() {
+/**
+ * Limpia el historial de operaciones
+ */
+function clearHistory() {
     history = [];
     localStorage.removeItem('vectorHistory');
     renderHistory();
-  }
+}
 
+/**
+ * Configura el tutorial interactivo de la aplicación
+ */
 function setupTutorial() {
     const tutorialModal = document.getElementById('tutorial-modal');
     const prevButton = document.getElementById('prev-step');
@@ -596,10 +675,10 @@ function setupTutorial() {
     const closeButton = document.getElementById('close-tutorial');
     const reopenButton = document.getElementById('reopen-tutorial');
 
-    // Mostrar el tutorial cada vez que se carga la página
+    // Mostrar tutorial al cargar
     tutorialModal.style.display = 'flex';
 
-    // Navegación del tutorial
+    // Configurar navegación
     prevButton.addEventListener('click', () => {
         if (currentStep > 1) {
             currentStep--;
@@ -631,6 +710,9 @@ function setupTutorial() {
     });
 }
 
+/**
+ * Actualiza el paso actual del tutorial
+ */
 function updateTutorialStep() {
     // Actualizar pasos
     document.querySelectorAll('.tutorial-step').forEach(step => {
@@ -640,7 +722,7 @@ function updateTutorialStep() {
         }
     });
 
-    // Actualizar botones
+    // Actualizar botones de navegación
     const prevButton = document.getElementById('prev-step');
     const nextButton = document.getElementById('next-step');
     const dismissButton = document.getElementById('dismiss-tutorial');
@@ -656,30 +738,37 @@ function updateTutorialStep() {
 }
 
 /**
- * Dibuja los arcos de ángulo entre dos vectores, asegurando que el arco esté siempre entre ellos,
- * partiendo del origen y siguiendo el sentido correcto. Las etiquetas se posicionan en el centro del sector.
+ * Dibuja los arcos de ángulo entre dos vectores
+ * @param {{x: number, y: number}} v1 - Primer vector
+ * @param {{x: number, y: number}} v2 - Segundo vector
+ * @param {number} angleMenor - Ángulo menor entre los vectores en grados
  */
 function drawAngleArc(v1, v2, angleMenor) {
-    // Ángulos respecto al eje X
+    // Calcular ángulos respecto al eje X
     const theta1 = Math.atan2(v1.y, v1.x);
     const theta2 = Math.atan2(v2.y, v2.x);
+    
     // Calcular diferencia y normalizar
     let delta = theta2 - theta1;
     while (delta < 0) delta += 2 * Math.PI;
-    // Menor y mayor ángulo
+    
+    // Determinar ángulos menor y mayor
     const menor = delta <= Math.PI ? delta : 2 * Math.PI - delta;
     const mayor = 2 * Math.PI - menor;
-    // Sentidos
+    
+    // Calcular puntos de inicio y fin
     let startMenor = theta1;
     let endMenor = theta1 + menor;
     let startMayor = theta1 + menor;
     let endMayor = theta1 + 2 * Math.PI;
-    // Radio fijo proporcional al menor vector
+    
+    // Calcular radio del arco
     const r = Math.max(1, Math.min(
         Math.sqrt(v1.x * v1.x + v1.y * v1.y),
         Math.sqrt(v2.x * v2.x + v2.y * v2.y)
     ) * 0.3);
-    // Arco menor (agudo)
+
+    // Dibujar arco menor (agudo)
     calculator.setExpression({
         id: 'angle_arc_menor',
         latex: `\\left(${r} \\cos(t), ${r} \\sin(t)\\right)`,
@@ -689,7 +778,8 @@ function drawAngleArc(v1, v2, angleMenor) {
         lineWidth: 3
     });
     currentExpressions.push('angle_arc_menor');
-    // Etiqueta menor
+
+    // Etiqueta del ángulo menor
     const labelAngleMenor = startMenor + menor / 2;
     const labelRadiusMenor = r * 1.18;
     calculator.setExpression({
@@ -701,7 +791,8 @@ function drawAngleArc(v1, v2, angleMenor) {
         dragMode: Desmos.DragModes.NONE
     });
     currentExpressions.push('angle_label_menor');
-    // Arco mayor (obtuso)
+
+    // Dibujar arco mayor (obtuso)
     calculator.setExpression({
         id: 'angle_arc_mayor',
         latex: `\\left(${r * 0.85} \\cos(t), ${r * 0.85} \\sin(t)\\right)`,
@@ -712,7 +803,8 @@ function drawAngleArc(v1, v2, angleMenor) {
         opacity: 0.5
     });
     currentExpressions.push('angle_arc_mayor');
-    // Etiqueta mayor
+
+    // Etiqueta del ángulo mayor
     const labelAngleMayor = endMenor + (mayor / 2);
     const labelRadiusMayor = r * 0.95;
     calculator.setExpression({
