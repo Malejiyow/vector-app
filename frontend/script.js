@@ -237,30 +237,51 @@ function fmt(n, sig = 3) {
       try {
           loader.style.display = 'flex';
           if (operation === 'sum') {
-              const response = await fetch('/suma_lista', {
+              const response = await fetch('/api/suma_vectores', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ vectores: vectors })
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      Ax: vectors[0].x,
+                      Ay: vectors[0].y,
+                      Bx: vectors[1].x,
+                      By: vectors[1].y
+                  })
               });
               const data = await response.json();
               if (!data.success) throw new Error(data.detail || 'Error en la suma');
               result = { x: data.result.Rx, y: data.result.Ry };
           } else if (operation === 'dot') {
               const v = vectors.slice(0, 2);
-              const response = await fetch('/producto_punto', {
+              const response = await fetch('/api/producto_punto', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ Ax: v[0].x, Ay: v[0].y, Bx: v[1].x, By: v[1].y })
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      Ax: v[0].x,
+                      Ay: v[0].y,
+                      Bx: v[1].x,
+                      By: v[1].y
+                  })
               });
               const data = await response.json();
               if (!data.success) throw new Error(data.detail || 'Error en el producto escalar');
               result = data.result.producto_punto;
           } else if (operation === 'magnitude') {
               const v = vectors.slice(0, 2);
-              const response = await fetch('/magnitud_vectores', {
+              const response = await fetch('/api/magnitud_vectores', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ Ax: v[0].x, Ay: v[0].y, Bx: v[1].x, By: v[1].y })
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      Ax: v[0].x,
+                      Ay: v[0].y,
+                      Bx: v[1].x,
+                      By: v[1].y
+                  })
               });
               const data = await response.json();
               if (!data.success) throw new Error(data.detail || 'Error en la magnitud');
@@ -270,10 +291,17 @@ function fmt(n, sig = 3) {
               ];
           } else if (operation === 'angle') {
               const v = vectors.slice(0, 2);
-              const response = await fetch('/angulo_vectores', {
+              const response = await fetch('/api/angulo_vectores', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ Ax: v[0].x, Ay: v[0].y, Bx: v[1].x, By: v[1].y })
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      Ax: v[0].x,
+                      Ay: v[0].y,
+                      Bx: v[1].x,
+                      By: v[1].y
+                  })
               });
               const data = await response.json();
               if (!data.success) throw new Error(data.detail || 'Error en el ángulo');

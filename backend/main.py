@@ -15,7 +15,7 @@ app = FastAPI(title="Vector App API", description="Operaciones vectoriales en �
 # 2. Habilitar CORS para llamadas AJAX desde el frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # Ajusta esto a tu dominio/puerto si lo deseas
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,18 +35,13 @@ class Vector2D(BaseModel):
 class ListaVectores(BaseModel):
     vectores: List[Vector2D] = Field(..., description="Lista de vectores a sumar")
 
-# 4. Montar archivos estáticos en /static
-app.mount(
-    "/static",
-    StaticFiles(directory=os.path.join(os.path.dirname(__file__), "../frontend")),
-    name="static"
-)
+# 4. Montar archivos estáticos
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 # 5. Ruta raíz que sirve el index.html
 @app.get("/", include_in_schema=False)
 def read_index():
-    index_path = os.path.join(os.path.dirname(__file__), "../frontend/index.html")
-    return FileResponse(index_path)
+    return FileResponse("frontend/index.html")
 
 # 6. Endpoint de salud
 @app.get("/health", tags=["Utilidad"])
@@ -54,7 +49,7 @@ def health():
     return {"status": "ok"}
 
 # 7. Endpoints de la API
-@app.post("/suma_vectores", tags=["Operaciones"], summary="Suma de dos vectores")
+@app.post("/api/suma_vectores", tags=["Operaciones"], summary="Suma de dos vectores")
 def suma_vectores(v: Vectores):
     try:
         Rx = v.Ax + v.Bx
@@ -63,7 +58,7 @@ def suma_vectores(v: Vectores):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error en suma: {str(e)}")
 
-@app.post("/suma_lista", tags=["Operaciones"], summary="Suma de una lista de vectores")
+@app.post("/api/suma_lista", tags=["Operaciones"], summary="Suma de una lista de vectores")
 def suma_lista(data: ListaVectores):
     try:
         Rx = sum(vec.x for vec in data.vectores)
@@ -72,7 +67,7 @@ def suma_lista(data: ListaVectores):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error en suma de lista: {str(e)}")
 
-@app.post("/producto_punto", tags=["Operaciones"], summary="Producto escalar entre dos vectores")
+@app.post("/api/producto_punto", tags=["Operaciones"], summary="Producto escalar entre dos vectores")
 def producto_punto(v: Vectores):
     try:
         dot = v.Ax * v.Bx + v.Ay * v.By
@@ -80,7 +75,7 @@ def producto_punto(v: Vectores):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error en producto punto: {str(e)}")
 
-@app.post("/magnitud_vectores", tags=["Operaciones"], summary="Magnitud de dos vectores")
+@app.post("/api/magnitud_vectores", tags=["Operaciones"], summary="Magnitud de dos vectores")
 def magnitud_vectores(v: Vectores):
     try:
         magA = sqrt(v.Ax**2 + v.Ay**2)
@@ -89,7 +84,7 @@ def magnitud_vectores(v: Vectores):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error en magnitud: {str(e)}")
 
-@app.post("/angulo_vectores", tags=["Operaciones"], summary="Ángulo entre dos vectores en grados")
+@app.post("/api/angulo_vectores", tags=["Operaciones"], summary="Ángulo entre dos vectores en grados")
 def angulo_vectores(v: Vectores):
     try:
         dot = v.Ax * v.Bx + v.Ay * v.By
