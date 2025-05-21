@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import List
 from math import sqrt, acos, degrees
+from pathlib import Path
 
 # 1. Instancia de FastAPI
 app = FastAPI(title="Vector App API", description="Operaciones vectoriales en ℝ²", version="1.1")
@@ -35,20 +36,24 @@ class Vector2D(BaseModel):
 class ListaVectores(BaseModel):
     vectores: List[Vector2D] = Field(..., description="Lista de vectores a sumar")
 
-# 4. Montar archivos estáticos
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+# 4. Obtener la ruta base del proyecto
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend"
 
-# 5. Ruta raíz que sirve el index.html
+# 5. Montar archivos estáticos
+app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
+
+# 6. Ruta raíz que sirve el index.html
 @app.get("/", include_in_schema=False)
 def read_index():
-    return FileResponse("frontend/index.html")
+    return FileResponse(str(FRONTEND_DIR / "index.html"))
 
-# 6. Endpoint de salud
+# 7. Endpoint de salud
 @app.get("/health", tags=["Utilidad"])
 def health():
     return {"status": "ok"}
 
-# 7. Endpoints de la API
+# 8. Endpoints de la API
 @app.post("/api/suma_vectores", tags=["Operaciones"], summary="Suma de dos vectores")
 def suma_vectores(v: Vectores):
     try:
