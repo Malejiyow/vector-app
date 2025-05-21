@@ -6,13 +6,13 @@
   <title>Vector App: Simulador Interactivo para Operaciones con Vectores en ℝ²</title>
   
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/static/resources/ICON_VECTOR-APP.png">
-  <link rel="apple-touch-icon" href="/static/resources/ICON_VECTOR-APP.png">
+  <link rel="icon" type="image/png" href="resources/ICON_VECTOR-APP.png">
+  <link rel="apple-touch-icon" href="resources/ICON_VECTOR-APP.png">
   
   <!-- Animate.css -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" />
   <!-- CSS -->
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
@@ -204,13 +204,12 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <!-- Desmos API -->
   <script>
-    
     const desmosApiKey = process.env.DESMOS_API_KEY || 'dcb31709b452b1cf9dc26972add0fda6';
     const script = document.createElement('script');
     script.src = `https://www.desmos.com/api/v1.7/calculator.js?apiKey=${desmosApiKey}`;
     document.head.appendChild(script);
   </script>
  
-  <script src="/static/script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

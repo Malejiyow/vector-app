@@ -21,6 +21,10 @@
         "dest": "/frontend/$1"
       },
       {
+        "src": "/resources/(.*)",
+        "dest": "/frontend/resources/$1"
+      },
+      {
         "src": "/(.*)",
         "dest": "/frontend/$1"
       }
