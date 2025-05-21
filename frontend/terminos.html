@@ -7,38 +7,23 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="/static/resources/ICON_VECTOR-APP.png">
   <link rel="apple-touch-icon" href="/static/resources/ICON_VECTOR-APP.png">
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/legal.css" />
   <style>
-    html, body { height: 100%; min-height: 100vh; margin: 0; padding: 0; }
-    body.legal-bg { min-height: 100vh; height: 100vh; display: flex; flex-direction: column; }
-    .legal-header, .chat-container, .app-footer { flex-shrink: 0; }
-    .chat-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-    .logo-home {
-      position: fixed;
-      top: 1.2rem;
-      left: 1.2rem;
-      z-index: 100;
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      box-shadow: 0 0 24px var(--neon2), 0 0 8px var(--neon);
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.2s;
+    /* Solo estilos específicos que no están en el CSS principal */
+    .legal-header h1 {
+      font-size: 1.4rem;
+      margin-bottom: 0.3rem;
     }
-    .logo-home:hover {
-      transform: scale(1.08) rotate(-8deg);
-      box-shadow: 0 0 36px var(--neon2), 0 0 16px var(--neon);
+    .legal-header p {
+      font-size: 0.9rem;
+    }
+    .legal-divider {
+      width: 60%;
+      margin: 0.5rem auto;
     }
     @media (max-width: 600px) {
-      .logo-home {
-        width: 44px;
-        height: 44px;
-        top: 0.5rem;
-        left: 0.5rem;
+      .legal-header h1 {
+        font-size: 1.2rem;
       }
     }
   </style>

@@ -8,10 +8,10 @@
   --text: #e2e8f0;
   --muted: #a0aec0;
   --radius: 8px;
-  --space: 1rem;
+  --space: 0.8rem;
   --blur: 12px;
   --transition: 0.3s ease;
-  --shadow-neon: 0 0 8px var(--neon), 0 0 16px var(--neon), 0 0 24px var(--neon2);
+  --shadow-neon: 0 0 8px var(--neon);
 }
 
 [data-theme="light"] {
@@ -38,14 +38,19 @@ body[data-theme="light"] {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
   position: relative;
   min-height: 100vh;
   color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 body::before {
   content: '';
@@ -183,18 +188,18 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: var(--space);
 }
 
-/* Header neon mejorado */
+/* Header mejorado para móviles */
 .app-header {
   width: 100%;
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1rem;
   position: relative;
-  padding: 2rem 0;
+  padding: 0.8rem 0;
   background: 
     linear-gradient(to bottom, 
       rgba(79, 209, 197, 0.15),
@@ -255,39 +260,56 @@ body::before {
   display: inline-block;
   background: rgba(79, 209, 197, 0.1);
   color: var(--neon);
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
   font-weight: 500;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   border: 1px solid rgba(79, 209, 197, 0.3);
   backdrop-filter: blur(4px);
   box-shadow: 0 0 10px rgba(79, 209, 197, 0.2);
-  margin: 0.5rem 0;
+  margin: 0.2rem 0;
 }
 
+/* Logo y contenedor mejorados */
 .logo-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3rem;
-  margin-bottom: 1.5rem;
-  position: relative;
-  max-width: 800px;
+  gap: 1.2rem;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0.8rem;
+  max-width: 800px;
+  position: relative;
   z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(79, 209, 197, 0.05) 0%,
+    rgba(129, 230, 217, 0.1) 50%,
+    rgba(79, 209, 197, 0.05) 100%
+  );
+  border-radius: var(--radius);
+  backdrop-filter: blur(8px);
 }
 
 .app-logo {
-  width: 140px;
-  height: 140px;
+  width: 70px;
+  height: 70px;
   filter: drop-shadow(0 0 12px var(--neon)) drop-shadow(0 0 24px var(--neon2));
-  transition: all 0.5s ease;
-  animation: float 4s ease-in-out infinite;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   position: relative;
   z-index: 2;
+  animation: float 4s ease-in-out infinite;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  border-radius: 50%;
+  border: 2px solid var(--neon2);
+}
+
+.app-logo:hover {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 0 16px var(--neon)) drop-shadow(0 0 32px var(--neon2));
 }
 
 @keyframes float {
@@ -295,16 +317,11 @@ body::before {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-15px);
+    transform: translateY(-10px);
   }
   100% {
     transform: translateY(0px);
   }
-}
-
-.app-logo:hover {
-  transform: scale(1.15);
-  filter: drop-shadow(0 0 16px var(--neon)) drop-shadow(0 0 32px var(--neon2));
 }
 
 .title-container {
@@ -312,12 +329,16 @@ body::before {
   flex-grow: 1;
   position: relative;
   z-index: 2;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius);
+  border: 1px solid rgba(79, 209, 197, 0.1);
 }
 
 .title-container::before {
   content: '';
   position: absolute;
-  left: -1.5rem;
+  left: -0.5rem;
   top: 50%;
   transform: translateY(-50%);
   width: 2px;
@@ -331,11 +352,11 @@ body::before {
 }
 
 .neon-text {
-  font-size: 3.5rem;
+  font-size: 2rem;
   color: #fff;
   text-shadow: var(--shadow-neon);
   margin: 0;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   line-height: 1.2;
   background: linear-gradient(to right, #fff, var(--neon2));
   -webkit-background-clip: text;
@@ -347,10 +368,10 @@ body::before {
 .neon-text::after {
   content: '';
   position: absolute;
-  top: -20px;
-  left: -20px;
-  right: -20px;
-  bottom: -20px;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
   background: radial-gradient(
     circle at center,
     rgba(79, 209, 197, 0.1),
@@ -361,11 +382,11 @@ body::before {
 }
 
 .neon-subtitle {
-  font-size: 1.3rem;
+  font-size: 0.9rem;
   color: var(--neon2);
   text-shadow: 0 0 6px var(--neon2);
-  margin-top: 0.5rem;
-  letter-spacing: 1px;
+  margin-top: 0.2rem;
+  letter-spacing: 0.5px;
   opacity: 0.9;
 }
 
@@ -389,8 +410,8 @@ main {
 main > section {
   background: var(--surface);
   backdrop-filter: blur(calc(var(--blur) / 2));
-  margin: var(--space) auto;
-  padding: var(--space);
+  margin: 0.8rem auto;
+  padding: 1rem;
   border-radius: var(--radius);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   transition: transform var(--transition), background var(--transition);
@@ -402,7 +423,7 @@ main > section:hover {
 /* Sección de ingreso de vectores */
 .input-section {
   position: relative;
-  padding: 2rem;
+  padding: 1.5rem;
   border: 2px solid var(--neon2);
   background: rgba(0, 0, 0, 0.4);
   box-shadow: 0 0 12px var(--neon), inset 0 0 8px var(--neon2);
@@ -412,21 +433,22 @@ main > section:hover {
   text-align: center;
   color: var(--neon2);
   text-shadow: var(--shadow-neon);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
 }
 
 /* Contenedor de vectores */
 .vectors-container {
   display: grid;
-  gap: var(--space);
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  margin-bottom: var(--space);
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 0.8rem;
 }
 
 .vector-fieldset {
   background: rgba(0, 0, 0, 0.2);
   border: 1px dashed var(--neon);
-  padding: var(--space);
+  padding: 0.8rem;
   border-radius: var(--radius);
   position: relative;
   transition: all var(--transition);
@@ -469,12 +491,13 @@ main > section:hover {
 .vector-fieldset legend {
   background: var(--neon);
   color: #000;
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-weight: bold;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  font-size: 0.9rem;
 }
 
 .vector-fieldset legend svg {
@@ -491,13 +514,14 @@ main > section:hover {
 
 .vector-fieldset input {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.4rem;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid var(--neon2);
   border-radius: var(--radius);
   color: #fff;
   transition: border-color var(--transition), box-shadow var(--transition);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
 }
 
 .vector-fieldset input:focus {
@@ -509,17 +533,17 @@ main > section:hover {
 /* Controles de vectores */
 .vector-controls {
   display: flex;
-  gap: var(--space);
+  gap: 0.8rem;
   justify-content: center;
-  margin-bottom: var(--space);
+  margin-bottom: 0.8rem;
 }
 
 .add-vector-button,
 .clear-vectors-button {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
   border: 2px solid var(--neon);
   border-radius: var(--radius);
   background: transparent;
@@ -554,48 +578,98 @@ main > section:hover {
   box-shadow: 0 0 12px #f687b3;
 }
 
-/* Botón Calcular centrado y pequeño */
+/* Botón Calcular mejorado */
 .calculate-button {
-  display: block;
-  margin: var(--space) auto 0;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  background: var(--neon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.8rem auto 0;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--neon) 0%, var(--neon2) 100%);
   color: #000;
   border: none;
   border-radius: var(--radius);
-  box-shadow: 0 0 12px var(--neon);
+  box-shadow: 0 0 12px var(--neon), 0 0 24px var(--neon2);
   cursor: pointer;
-  transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 250px;
+  letter-spacing: 0.5px;
 }
+
+.calculate-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.calculate-button:hover::before {
+  left: 100%;
+}
+
 .calculate-button:disabled {
   background: var(--muted);
   cursor: not-allowed;
   box-shadow: none;
+  opacity: 0.7;
+  transform: none;
 }
+
 .calculate-button:not(:disabled):hover {
-  background: var(--neon2);
   transform: translateY(-2px);
-  box-shadow: 0 0 16px var(--neon2);
+  box-shadow: 0 0 16px var(--neon), 0 0 32px var(--neon2);
+}
+
+.calculate-button:not(:disabled):active {
+  transform: translateY(1px);
+  box-shadow: 0 0 8px var(--neon), 0 0 16px var(--neon2);
+}
+
+/* Media queries para el botón en móviles */
+@media (max-width: 480px) {
+  .calculate-button {
+    margin: 0.6rem auto 0;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.95rem;
+    max-width: 200px;
+  }
 }
 
 /* Sección Operaciones */
 .operations-section {
   text-align: center;
+  padding: 1rem;
 }
 .operations-section h2 {
   color: var(--neon2);
   text-shadow: 0 0 6px var(--neon2);
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
 }
 .operations-group {
   display: inline-flex;
-  gap: 0.5rem;
-  margin-top: var(--space);
+  gap: 0.4rem;
+  margin-top: 0.8rem;
   flex-wrap: wrap;
   justify-content: center;
 }
 .operations-group button {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.8rem;
   font-size: 0.9rem;
   border: 2px solid var(--neon);
   border-radius: var(--radius);
@@ -603,7 +677,7 @@ main > section:hover {
   color: var(--text);
   box-shadow: 0 0 6px var(--neon);
   cursor: pointer;
-  transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+  transition: all var(--transition);
 }
 .operations-group button.active,
 .operations-group button:hover {
@@ -626,28 +700,36 @@ main > section:hover {
   flex-direction: column;
   align-items: center;
   position: relative;
+  padding: 1rem;
+}
+.results-section h2,
+.graph-section h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
 }
 #numeric-results {
   display: grid;
-  gap: var(--space);
+  gap: 0.8rem;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   width: 100%;
 }
 .result-item {
   background: rgba(255, 255, 255, 0.1);
-  padding: var(--space);
+  padding: 0.8rem;
   border-radius: var(--radius);
   text-align: center;
 }
 .result-item h3 {
   color: var(--neon);
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
 }
 
 /* Gráfico interactivo */
 .graph-container {
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 400px;
   border: 2px solid var(--neon2);
   border-radius: var(--radius);
   overflow: hidden;
@@ -745,14 +827,6 @@ main > section:hover {
   margin-bottom: 1rem;
 }
 
-.results-section h2 {
-  text-align: center;
-  color: var(--neon2);
-  text-shadow: 0 0 8px var(--neon);
-  margin-bottom: 1rem;
-  font-size: 1.4rem;
-}
-
 .results-details {
   display: flex;
   gap: 0.5rem;
@@ -823,13 +897,13 @@ main > section:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .history-header h2 {
   color: var(--neon2);
   text-shadow: 0 0 8px var(--neon);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   margin: 0;
 }
 
@@ -860,9 +934,9 @@ main > section:hover {
 }
 
 .history-container {
-  max-height: 200px;
+  max-height: 180px;
   overflow-y: auto;
-  padding-right: 0.5rem;
+  padding-right: 0.4rem;
 }
 
 .history-list {
@@ -873,27 +947,15 @@ main > section:hover {
 
 .history-list li {
   background: rgba(0, 0, 0, 0.2);
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
+  padding: 0.6rem;
+  margin-bottom: 0.4rem;
   border-radius: var(--radius);
   border-left: 2px solid var(--neon);
-  font-size: 0.9rem;
-  animation: slideIn 0.3s ease;
+  font-size: 0.85rem;
 }
 
 .history-list li:last-child {
   margin-bottom: 0;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 /* Scrollbar personalizado */
@@ -915,234 +977,35 @@ main > section:hover {
   background: var(--neon2);
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .app-wrapper {
-    padding: calc(var(--space) * 0.8);
-  }
-  
-  .graph-container {
-    height: 500px;
-  }
-}
-
-@media (max-width: 768px) {
+/* Media queries para el logo en móviles */
+@media (max-width: 480px) {
   .logo-container {
     flex-direction: column;
-    gap: 2rem;
-    padding: 0 1rem;
+    gap: 0.8rem;
+    padding: 0.6rem;
   }
-  
+
+  .app-logo {
+    width: 60px;
+    height: 60px;
+    padding: 0.4rem;
+  }
+
   .title-container {
     text-align: center;
+    padding: 0.4rem;
   }
-  
+
   .title-container::before {
     display: none;
   }
-  
-  .neon-text {
-    font-size: 2.8rem;
-  }
-  
-  .neon-subtitle {
-    font-size: 1.1rem;
-  }
-  
-  .app-logo {
-    width: 120px;
-    height: 120px;
-  }
-  
-  .neon-underline {
-    width: 220px;
-    margin: 1rem auto 0;
-  }
-  
-  .operations-group {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .graph-container {
-    height: 400px;
-  }
-  
-  .input-section form {
-    grid-template-columns: 1fr;
-  }
-  
-  .result-item {
-    padding: calc(var(--space) * 0.8);
-  }
-  
-  .results-details {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .result-card {
-    width: 100%;
-  }
-  
-  .coordinates-display {
-    position: static;
-    margin-top: 0.5rem;
-    text-align: center;
-  }
-  
-  .history-container {
-    max-height: 150px;
-  }
-  
-  .version-badge {
-    right: 3rem;
-    top: 0.5rem;
-    font-size: 0.8rem;
-    padding: 0.15rem 0.5rem;
-  }
-}
 
-@media (max-width: 480px) {
-  .app-header {
-    padding: 1rem 0.2rem;
-    margin-bottom: 1.2rem;
-  }
-  .logo-container {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 0 0.5rem;
-  }
-  .title-container {
-    text-align: center;
-    padding: 0 0.2rem;
-  }
   .neon-text {
-    font-size: 1.3rem;
-    word-break: break-word;
+    font-size: 1.6rem;
   }
+
   .neon-subtitle {
-    font-size: 0.9rem;
-  }
-  .app-logo {
-    width: 70px;
-    height: 70px;
-  }
-  .neon-underline {
-    width: 100px;
-    margin: 0.5rem auto 0;
-  }
-  .input-section, .operations-section, .results-section, .graph-section, .history-section {
-    padding: 0.7rem 0.3rem;
-    margin: 0.5rem 0;
-    border-radius: 10px;
-  }
-  .vectors-container {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-  .vector-fieldset {
-    padding: 0.5rem;
-    font-size: 0.95rem;
-  }
-  .vector-fieldset legend {
-    font-size: 0.95rem;
-    padding: 0.15rem 0.3rem;
-  }
-  .vector-fieldset input {
-    font-size: 0.95rem;
-    padding: 0.3rem;
-  }
-  .vector-controls {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .add-vector-button, .clear-vectors-button, .calculate-button {
-    width: 100%;
-    font-size: 1rem;
-    padding: 0.6rem 0;
-  }
-  .results-details {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: stretch;
-  }
-  .result-card {
-    min-width: unset;
-    width: 100%;
-    font-size: 1rem;
-    padding: 0.5rem 0.3rem;
-  }
-  .coordinates-display {
-    position: static;
-    margin-top: 0.3rem;
-    font-size: 0.9rem;
-    padding: 2px 4px;
-  }
-  .graph-container {
-    height: 220px;
-    min-width: 0;
-    padding: 0;
-  }
-  #desmos-calculator {
-    height: 220px;
-    min-width: 0;
-  }
-  .history-header h2 {
-    font-size: 1.1rem;
-  }
-  .history-container {
-    max-height: 90px;
-    padding-right: 0.2rem;
-  }
-  .history-list li {
     font-size: 0.85rem;
-    padding: 0.4rem;
-  }
-  .theme-switch, .tutorial-button {
-    width: 32px;
-    height: 32px;
-    top: 0.3rem;
-  }
-  .tutorial-button {
-    right: 2.5rem;
-  }
-  .theme-switch {
-    right: 0.3rem;
-  }
-  .close-tutorial {
-    width: 28px;
-    height: 28px;
-    top: 0.3rem;
-    right: 0.3rem;
-  }
-  .tutorial-content {
-    width: 98vw;
-    min-width: 0;
-    padding: 0.7rem 0.2rem;
-  }
-  .tutorial-content h2 {
-    font-size: 1.1rem;
-  }
-  .tutorial-step h3 {
-    font-size: 1rem;
-  }
-  .tutorial-image {
-    width: 40px;
-    height: 40px;
-  }
-  .tutorial-nav-button, .dismiss-tutorial {
-    font-size: 0.95rem;
-    padding: 0.5rem 0.7rem;
-  }
-  .version-badge {
-    font-size: 0.7rem;
-    padding: 0.1rem 0.3rem;
-    margin: 0.2rem 0;
-  }
-  .app-footer {
-    font-size: 0.85rem;
-    padding: 0.5rem 0.2rem;
   }
 }
 
@@ -1251,11 +1114,6 @@ main > section:hover {
     width: 20px;
     height: 20px;
   }
-
-  .version-badge {
-    font-size: 0.8rem;
-    padding: 0.15rem 0.5rem;
-  }
 }
 
 /* Footer mejorado */
@@ -1264,12 +1122,13 @@ main > section:hover {
   background: linear-gradient(90deg, var(--bg-end) 0%, var(--bg-start) 100%);
   color: var(--muted);
   text-align: center;
-  padding: 1.2rem 0 0.7rem 0;
-  font-size: 1rem;
+  padding: 0.8rem 0 0.5rem 0;
+  font-size: 0.9rem;
   border-top: 2px solid var(--neon2);
   box-shadow: 0 -2px 16px rgba(79,209,197,0.08);
   position: relative;
   z-index: 2;
+  margin-top: auto;
 }
 .app-footer .footer-link {
   color: var(--neon);

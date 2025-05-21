@@ -1,0 +1,469 @@
+/* Heredar variables y estilos base del style.css principal */
+:root {
+  /* Modo oscuro (default) */
+  --bg-start: #0f1021;
+  --bg-end: #1f2233;
+  --surface: rgba(255,255,255,0.05);
+  --neon: #4fd1c5;
+  --neon2: #81e6d9;
+  --text: #e2e8f0;
+  --muted: #a0aec0;
+  --radius: 8px;
+  --space: 1rem;
+  --blur: 12px;
+  --transition: 0.3s ease;
+  --shadow-neon: 0 0 8px var(--neon);
+  --animation-duration: 0.5s;
+}
+
+[data-theme="light"] {
+  --bg-start: #f7fafc;
+  --bg-end: #e3eaf7;
+  --surface: #ffffffcc;
+  --neon: #3182ce;
+  --neon2: #63b3ed;
+  --text: #222b45;
+  --muted: #718096;
+}
+
+/* Animaciones globales */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Estilos base para páginas legales */
+.legal-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+  position: relative;
+  overflow-x: hidden;
+  padding: var(--space);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn var(--animation-duration) ease;
+  padding-bottom: 0;
+}
+
+.legal-bg::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  background: 
+    radial-gradient(circle at 30% 20%, var(--neon2) 0%, transparent 60%),
+    radial-gradient(circle at 80% 80%, var(--neon) 0%, transparent 70%);
+  opacity: 0.08;
+  z-index: 0;
+  animation: moveBg 15s linear infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes moveBg {
+  0% { transform: scale(1); filter: blur(0px); }
+  100% { transform: scale(1.05); filter: blur(4px); }
+}
+
+/* Logo de inicio */
+.logo-home {
+  position: fixed;
+  top: var(--space);
+  left: var(--space);
+  width: 36px;
+  height: 36px;
+  background: var(--surface);
+  border: 1px solid var(--neon2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  z-index: 10;
+  box-shadow: 0 0 8px var(--neon2);
+  animation: slideInLeft var(--animation-duration) ease;
+}
+
+.logo-home:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-neon);
+}
+
+.logo-home img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  transition: var(--transition);
+}
+
+/* Encabezado legal */
+.legal-header {
+  text-align: center;
+  margin: 2rem 0 1rem;
+  padding: 0 var(--space);
+  max-width: 600px;
+  z-index: 2;
+  position: relative;
+  animation: slideInUp var(--animation-duration) ease;
+}
+
+.legal-header h1 {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 1.4rem;
+  color: var(--neon);
+  text-shadow: var(--shadow-neon);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.legal-header p {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--neon2);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+.legal-header img {
+  vertical-align: middle;
+  margin: 0 0.2rem;
+}
+
+/* Divisor */
+.legal-divider {
+  width: 60%;
+  height: 1px;
+  margin: 0.5rem auto 1.5rem;
+  background: linear-gradient(to right, 
+    transparent,
+    var(--neon2),
+    transparent
+  );
+  border-radius: 2px;
+  opacity: 0.5;
+  animation: slideInUp var(--animation-duration) ease;
+}
+
+/* Contenedor del chat */
+.chat-container {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto 2rem;
+  padding: 1.5rem var(--space);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 0 16px var(--neon2);
+  border: 1px solid var(--neon2);
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(var(--blur));
+  animation: slideInUp var(--animation-duration) ease;
+}
+
+.chat-container::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, var(--neon), var(--neon2), var(--neon));
+  border-radius: calc(var(--radius) + 2px);
+  z-index: -1;
+  opacity: 0.5;
+  animation: borderGlow 3s linear infinite;
+}
+
+@keyframes borderGlow {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.3; }
+}
+
+/* Burbujas de chat */
+.chat-bubble {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+  animation: slideInUp var(--animation-duration) ease;
+}
+
+.chat-bubble:last-child {
+  margin-bottom: 0;
+}
+
+/* Avatar de Paloma */
+.avatar-paloma {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px var(--neon2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.7rem;
+  flex-shrink: 0;
+  border: 1px solid var(--neon2);
+}
+
+.avatar-paloma img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+/* Burbujas de mensaje */
+.bubble-paloma {
+  background: linear-gradient(120deg, var(--neon2) 60%, var(--neon) 100%);
+  color: #222;
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(79, 209, 197, 0.1);
+  max-width: 85%;
+  animation: slideInLeft var(--animation-duration) ease;
+  position: relative;
+}
+
+.bubble-paloma::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+
+.bubble-user {
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  margin-left: auto;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(79, 209, 197, 0.1);
+  max-width: 85%;
+  border: 1px solid var(--neon2);
+  animation: slideInRight var(--animation-duration) ease;
+  position: relative;
+}
+
+.bubble-user::before {
+  content: '';
+  position: absolute;
+  right: -6px;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+/* Footer */
+.app-footer {
+  width: 100%;
+  padding: 1rem;
+  text-align: center;
+  background: var(--surface);
+  border-top: 1px solid var(--neon2);
+  box-shadow: 0 -2px 8px rgba(79, 209, 197, 0.05);
+  position: relative;
+  z-index: 2;
+  animation: slideInUp var(--animation-duration) ease;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.footer-paloma {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 0.4rem;
+}
+
+.footer-link {
+  color: var(--neon);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+  position: relative;
+}
+
+.footer-link::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--neon2);
+  transition: var(--transition);
+}
+
+.footer-link:hover {
+  color: var(--neon2);
+}
+
+.footer-link:hover::after {
+  width: 100%;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+  .legal-header {
+    margin: 1.5rem 0 1rem;
+  }
+
+  .legal-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .chat-container {
+    padding: 1.2rem 1rem;
+  }
+
+  .bubble-paloma,
+  .bubble-user {
+    font-size: 0.85rem;
+    padding: 0.7rem 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .legal-bg {
+    padding: 0.5rem;
+    padding-bottom: 0;
+  }
+
+  .logo-home {
+    top: 0.5rem;
+    left: 0.5rem;
+    width: 32px;
+    height: 32px;
+  }
+
+  .legal-header {
+    margin: 1.2rem 0 0.8rem;
+  }
+
+  .legal-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .legal-header p {
+    font-size: 0.85rem;
+  }
+
+  .legal-divider {
+    width: 80%;
+    margin: 0.3rem auto 1rem;
+  }
+
+  .chat-container {
+    padding: 1rem 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .bubble-paloma,
+  .bubble-user {
+    font-size: 0.85rem;
+    padding: 0.7rem 0.8rem;
+    max-width: 90%;
+  }
+
+  .avatar-paloma {
+    width: 28px;
+    height: 28px;
+    margin-right: 0.5rem;
+  }
+
+  .app-footer {
+    padding: 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .footer-paloma {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .legal-bg {
+    padding: 0.5rem;
+    padding-bottom: 0;
+  }
+
+  .legal-header {
+    margin: 1rem 0 0.6rem;
+  }
+
+  .legal-header h1 {
+    font-size: 1.1rem;
+  }
+
+  .legal-header p {
+    font-size: 0.8rem;
+  }
+
+  .chat-container {
+    padding: 0.8rem 0.6rem;
+  }
+
+  .bubble-paloma,
+  .bubble-user {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.7rem;
+  }
+
+  .avatar-paloma {
+    width: 26px;
+    height: 26px;
+    margin-right: 0.4rem;
+  }
+}
+
+/* Tema claro */
+[data-theme="light"] .legal-bg {
+  background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+}
+
+[data-theme="light"] .chat-container {
+  background: var(--surface);
+  border-color: var(--neon);
+}
+
+[data-theme="light"] .bubble-user {
+  background: #fff;
+  border-color: var(--neon);
+}
+
+[data-theme="light"] .app-footer {
+  background: var(--surface);
+  border-top-color: var(--neon);
+} 
